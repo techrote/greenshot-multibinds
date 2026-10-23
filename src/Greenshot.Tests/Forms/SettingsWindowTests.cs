@@ -73,6 +73,7 @@ namespace Greenshot.Tests.Forms
             Assert.NotNull(viewModel.EditorConfiguration);
             Assert.NotNull(viewModel.ImageFormats);
             Assert.NotNull(viewModel.Destinations);
+            Assert.NotNull(viewModel.Destinations2);
             Assert.NotNull(viewModel.Plugins);
             Assert.NotNull(viewModel.ClipboardFormats);
             Assert.NotEmpty(viewModel.ClipboardFormats);
@@ -152,6 +153,8 @@ namespace Greenshot.Tests.Forms
                     var window = new SettingsWindow();
                     Assert.NotNull(window);
                     Assert.NotNull(window.DataContext);
+                    Assert.NotNull(window.HotkeysDestinations1TabItem);
+                    Assert.NotNull(window.HotkeysDestinations2TabItem);
 
                     var windowWithPlugin = new SettingsWindow("Jira");
                     Assert.NotNull(windowWithPlugin);
@@ -183,6 +186,10 @@ namespace Greenshot.Tests.Forms
 
                     window.SelectTab("plugins");
                     Assert.Same(window.PluginsTabItem, window.SettingsTabControl.SelectedItem);
+                    window.SelectTab("hotkeys");
+                    Assert.Same(window.HotkeysDestinations1TabItem, window.SettingsTabControl.SelectedItem);
+                    window.SelectTab("hotkeys2");
+                    Assert.Same(window.HotkeysDestinations2TabItem, window.SettingsTabControl.SelectedItem);
                     // By name, not by index: the expert tab comes after the AI tools and plugins tabs
                     if (((SettingsViewModel)window.DataContext).IsExpertTabVisible)
                     {
