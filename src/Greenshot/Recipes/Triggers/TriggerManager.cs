@@ -220,7 +220,7 @@ namespace Greenshot.Recipes.Triggers
                     return false;
                 }
 
-                var duplicate = parsed.FirstOrDefault(existing => existing.Value.Equals(sequence));
+                var duplicate = parsed.FirstOrDefault(existing => existing.Value.ConflictsWith(sequence));
                 if (!string.IsNullOrEmpty(duplicate.Key))
                 {
                     error = $"{item.Key} conflicts with {duplicate.Key} ({sequence}).";
@@ -245,7 +245,7 @@ namespace Greenshot.Recipes.Triggers
                     continue;
                 }
 
-                var conflict = parsed.FirstOrDefault(existing => existing.Value.Equals(recipeSequence));
+                var conflict = parsed.FirstOrDefault(existing => existing.Value.ConflictsWith(recipeSequence));
                 if (!string.IsNullOrEmpty(conflict.Key))
                 {
                     error = $"{conflict.Key} conflicts with recipe hotkey '{recipeHotkey.Name}' ({recipeSequence}).";
