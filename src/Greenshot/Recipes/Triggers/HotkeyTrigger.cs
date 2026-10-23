@@ -38,6 +38,7 @@ namespace Greenshot.Recipes.Triggers
         private int _registrationId = -1;
         private readonly IDictionary<string, object> _triggerParameters;
         public string HotkeyString { get; set; }
+        internal IReadOnlyDictionary<string, object> TriggerParameters => _triggerParameters as IReadOnlyDictionary<string, object>;
 
         public HotkeyTrigger(string id, string name, string hotkeyString, string targetRecipeId, IDictionary<string, object> triggerParameters = null)
             : base(id, name, targetRecipeId)
