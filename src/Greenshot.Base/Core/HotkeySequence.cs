@@ -176,6 +176,29 @@ namespace Greenshot.Base.Core
             return string.Join(", ", Chords.Select(c => c.ToString()));
         }
 
+        /// <summary>
+        /// True when two registered sequences are ambiguous because they are equal or one is a
+        /// complete prefix of the other. Sequences sharing only part of a prefix may coexist.
+        /// </summary>
+        public bool ConflictsWith(HotkeySequence other)
+        {
+            if (other == null || IsEmpty || other.IsEmpty)
+            {
+                return false;
+            }
+
+            int commonLength = Math.Min(Chords.Count, other.Chords.Count);
+            for (int i = 0; i < commonLength; i++)
+            {
+                if (!Chords[i].Equals(other.Chords[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public bool Equals(HotkeySequence other)
         {
             if (other is null) return false;
