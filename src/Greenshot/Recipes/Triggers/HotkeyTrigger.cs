@@ -74,9 +74,9 @@ namespace Greenshot.Recipes.Triggers
 
             // Never replace an already-working binding. Historically HotkeyManager replaces duplicate
             // handlers; triggers must refuse collisions so a later profile or recipe cannot steal a key.
-            if (HotkeyManager.IsRegistered(sequence))
+            if (HotkeyManager.ConflictsWithRegistered(sequence))
             {
-                Log.WarnFormat("Skipping hotkey '{0}' for {1}: the sequence is already registered.", HotkeyString, Name);
+                Log.WarnFormat("Skipping hotkey '{0}' for {1}: the sequence conflicts with an existing registration.", HotkeyString, Name);
                 return;
             }
 
