@@ -136,14 +136,21 @@ namespace Greenshot.Settings.Views
                     break;
                 case "destination":
                 case "destinations":
-                    SettingsTabControl.SelectedIndex = 3;
+                case "hotkeys":
+                case "hotkeys1":
+                    SettingsTabControl.SelectedItem = HotkeysDestinations1TabItem;
+                    break;
+                case "destination2":
+                case "destinations2":
+                case "hotkeys2":
+                    SettingsTabControl.SelectedItem = HotkeysDestinations2TabItem;
                     break;
                 case "editor":
-                    SettingsTabControl.SelectedIndex = 4;
+                    SettingsTabControl.SelectedIndex = 5;
                     break;
                 case "printer":
                 case "print":
-                    SettingsTabControl.SelectedIndex = 5;
+                    SettingsTabControl.SelectedIndex = 6;
                     break;
                 case "plugin":
                 case "plugins":
@@ -216,6 +223,13 @@ namespace Greenshot.Settings.Views
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
+            var recipeHotkeys = TriggerManager.Instance.GetAllTriggers().OfType<HotkeyTrigger>();
+            if (!TriggerManager.ValidateConfiguredHotkeys(_viewModel.CoreConfiguration, recipeHotkeys, out string hotkeyError))
+            {
+                MessageBox.Show(this, hotkeyError, "Hotkey conflict", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             HotkeyManager.UnregisterHotkeys();
             SaveSettings();
             TriggerManager.Instance.RestartHotkeyTriggers();
@@ -364,28 +378,19 @@ namespace Greenshot.Settings.Views
 
         private void SaveSettings()
         {
-            // Save destinations
-            var destinations = new List<string>();
-            
-            if (_viewModel.PickerSelected)
-            {
-                destinations.Add(nameof(WellKnownDestinations.Picker));
-            }
-            else
-            {
-                foreach (var destItem in _viewModel.Destinations.Where(d => d.IsSelected))
-                {
-                    destinations.Add(destItem.Designation);
-                }
+            // Profile 1 keeps the legacy destination setting; Profile 2 persists independently.
+            _viewModel.CoreConfiguration.OutputDestinations = CollectDestinations(
+                _viewModel.PickerSelected,
+                _viewModel.Destinations,
+                _viewModel.CoreConfiguration.OutputDestinations,
+                false);
 
-                // Keep the destinations which aren't there right now, e.g. of a plugin which isn't loaded
-                destinations.AddRange(_viewModel.CoreConfiguration.OutputDestinations?
-                    .Where(designation => designation != nameof(WellKnownDestinations.Picker)
-                                          && _viewModel.Destinations.All(d => !string.Equals(d.Designation, designation, StringComparison.OrdinalIgnoreCase)))
-                    ?? Enumerable.Empty<string>());
-            }
-            
-            _viewModel.CoreConfiguration.OutputDestinations = destinations;
+            _viewModel.CoreConfiguration.HotkeyProfile2OutputDestinations = CollectDestinations(
+                _viewModel.PickerSelected2,
+                _viewModel.Destinations2,
+                _viewModel.CoreConfiguration.HotkeyProfile2OutputDestinations,
+                true);
+
             _viewModel.SaveRestrictions();
 
             _viewModel.SaveRecipeOptions();
@@ -419,6 +424,48 @@ namespace Greenshot.Settings.Views
             
             // Force save of all configuration sections
             IniConfigRegistry.Get()?.Save();
+        }
+
+        private List<string> CollectDestinations(
+            bool pickerSelected,
+            IEnumerable<DestinationViewModel> items,
+            IEnumerable<string> existing,
+            bool profile2)
+        {
+            if (pickerSelected)
+            {
+                return new List<string> { nameof(WellKnownDestinations.Picker) };
+            }
+
+            var itemList = (items ?? Enumerable.Empty<DestinationViewModel>()).ToList();
+            var destinations = itemList
+                .Where(item => item.IsSelected)
+                .Where(item => !profile2 || IsAllowedForProfile2(item.Designation))
+                .Select(item => item.Designation)
+                .Where(designation => !string.IsNullOrWhiteSpace(designation))
+                .ToList();
+
+            // Preserve a destination whose plugin is not currently loaded.
+            destinations.AddRange((existing ?? Enumerable.Empty<string>())
+                .Where(designation => !string.Equals(designation, nameof(WellKnownDestinations.Picker), StringComparison.OrdinalIgnoreCase))
+                .Where(designation => itemList.All(item => !string.Equals(item.Designation, designation, StringComparison.OrdinalIgnoreCase)))
+                .Where(designation => !profile2 || IsAllowedForProfile2(designation)));
+
+            destinations = destinations.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (profile2 && destinations.Count == 0 && IsAllowedForProfile2("Editor"))
+            {
+                destinations.Add("Editor");
+            }
+
+            return destinations;
+        }
+
+        private bool IsAllowedForProfile2(string designation)
+        {
+            var profile1Item = _viewModel.Destinations?
+                .FirstOrDefault(item => string.Equals(item.Designation, designation, StringComparison.OrdinalIgnoreCase));
+            return profile1Item?.IsAllowed
+                   ?? ConfigurationRestrictions.IsDestinationAllowed(_viewModel.CoreConfiguration, designation);
         }
 
         /// <summary>
