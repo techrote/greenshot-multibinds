@@ -11,6 +11,12 @@ jobs:
     name: Windows build and tests
     runs-on: windows-latest
     timeout-minutes: 45
+    env:
+      Box13_ClientId: ci-placeholder
+      Box13_ClientSecret: ci-placeholder
+      DropBox13_ClientId: ci-placeholder
+      DropBox13_ClientSecret: ci-placeholder
+      Imgur13_ClientId: ci-placeholder
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -25,9 +31,13 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore and build test dependency graph
+      - name: Restore and generate build-time sources
         shell: cmd
-        run: msbuild src\Greenshot.Tests\Greenshot.Tests.csproj /restore /t:Build /p:Configuration=Debug /v:minimal
+        run: msbuild src\Greenshot.sln /restore /t:PrepareForBuild /p:Configuration=Debug /v:minimal
+
+      - name: Build test dependency graph
+        shell: cmd
+        run: msbuild src\Greenshot.Tests\Greenshot.Tests.csproj /t:Build /p:Configuration=Debug /v:minimal
 
       - name: Run tests
         shell: cmd
