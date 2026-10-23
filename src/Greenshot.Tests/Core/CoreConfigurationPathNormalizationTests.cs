@@ -21,6 +21,7 @@
 
 using System;
 using System.Collections.Generic;
+using Greenshot.Base;
 using Greenshot.Base.Core;
 using Xunit;
 
