@@ -63,6 +63,25 @@ namespace Greenshot.Base.Core
         [Description("Hotkey for opening the clipboard contents into the editor")]
         string ClipboardHotkey { get; set; }
 
+        [Description("Enable the second independent hotkey and destination profile")]
+        [DefaultValue(false)]
+        bool HotkeyProfile2Enabled { get; set; }
+
+        [Description("Second-profile hotkey for starting the region capture")]
+        string HotkeyProfile2RegionHotkey { get; set; }
+
+        [Description("Second-profile hotkey for starting the window capture")]
+        string HotkeyProfile2WindowHotkey { get; set; }
+
+        [Description("Second-profile hotkey for starting the fullscreen capture")]
+        string HotkeyProfile2FullscreenHotkey { get; set; }
+
+        [Description("Second-profile hotkey for starting the last region capture")]
+        string HotkeyProfile2LastregionHotkey { get; set; }
+
+        [Description("Second-profile hotkey for opening the clipboard contents into the editor")]
+        string HotkeyProfile2ClipboardHotkey { get; set; }
+
         [Description("Was the welcome window shown? Greenshot shows it once, at its first start")]
         bool WelcomeShown { get; set; }
 
@@ -70,6 +89,10 @@ namespace Greenshot.Base.Core
         [Description("Which destinations? Possible options (more might be added by plugins) are: Editor, FileDefault, FileWithDialog, Clipboard, Printer, EMail, Picker")]
         [DefaultValue("Picker")]
         List<string> OutputDestinations { get; set; }
+
+        [Description("Destinations used by the second hotkey profile")]
+        [DefaultValue("Picker")]
+        List<string> HotkeyProfile2OutputDestinations { get; set; }
 
         [Description("Specify which formats we copy on the clipboard? Options are: PNG, HTML, HTMLDATAURL and DIB")]
         [DefaultValue("PNG,DIB")]
