@@ -31,7 +31,7 @@ using Xunit;
 
 namespace Greenshot.Tests.Recipes
 {
-    [Collection(TestCollections.RecipeManager)]
+    [Collection(TestCollections.GlobalConfiguration)]
     public class TriggerIntegrationTests
     {
         public TriggerIntegrationTests()
