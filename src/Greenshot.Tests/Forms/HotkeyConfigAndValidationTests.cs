@@ -113,6 +113,19 @@ namespace Greenshot.Tests.Forms
         }
 
         [Fact]
+        public void HotkeySequence_ConflictDetection_RejectsPrefixesButAllowsDivergentSequences()
+        {
+            var single = HotkeySequence.Parse("Ctrl + K");
+            var longer = HotkeySequence.Parse("Ctrl + K, C");
+            var divergent = HotkeySequence.Parse("Ctrl + K, D");
+
+            Assert.True(single.ConflictsWith(longer));
+            Assert.True(longer.ConflictsWith(single));
+            Assert.True(longer.ConflictsWith(HotkeySequence.Parse("Ctrl + K, C")));
+            Assert.False(longer.ConflictsWith(divergent));
+        }
+
+        [Fact]
         public void HotkeyControls_CanBeInstantiatedOnStaThread()
         {
             Exception threadEx = null;
