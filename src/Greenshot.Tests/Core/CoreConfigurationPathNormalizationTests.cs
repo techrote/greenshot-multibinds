@@ -20,6 +20,8 @@
  */
 
 using System;
+using System.Collections.Generic;
+using Greenshot.Base;
 using Greenshot.Base.Core;
 using Xunit;
 
@@ -101,6 +103,41 @@ namespace Greenshot.Tests.Core
 
             Assert.Equal(desktopPath, config.OutputFilePath);
             Assert.Equal(dummyFile, config.OutputFileAsFullpath);
+        }
+
+        [Fact]
+        public void HotkeyProfile2_DefaultsDisabled_AndKeepsDestinationsIndependent()
+        {
+            var config = new CoreConfigurationImpl();
+            config.ResetToDefaults();
+
+            Assert.False(config.HotkeyProfile2Enabled);
+            Assert.Contains(nameof(WellKnownDestinations.Picker), config.HotkeyProfile2OutputDestinations);
+
+            config.OutputDestinations = new List<string> { "Editor" };
+            config.HotkeyProfile2OutputDestinations = new List<string> { nameof(WellKnownDestinations.Clipboard) };
+
+            Assert.Equal(new[] { "Editor" }, config.OutputDestinations);
+            Assert.Equal(new[] { nameof(WellKnownDestinations.Clipboard) }, config.HotkeyProfile2OutputDestinations);
+        }
+
+        [Fact]
+        public void HotkeyProfile2_RawIniValues_LoadWithoutTouchingLegacyProfile()
+        {
+            var config = new CoreConfigurationImpl();
+            config.ResetToDefaults();
+            string originalRegion = config.RegionHotkey;
+
+            config.SetRawValue(nameof(config.HotkeyProfile2Enabled), "True");
+            config.SetRawValue(nameof(config.HotkeyProfile2RegionHotkey), "Ctrl + Alt + F13");
+            config.SetRawValue(nameof(config.HotkeyProfile2OutputDestinations), "Clipboard,FileNoDialog");
+            config.OnAfterLoad();
+
+            Assert.True(config.HotkeyProfile2Enabled);
+            Assert.Equal("Ctrl + Alt + F13", config.HotkeyProfile2RegionHotkey);
+            Assert.Contains(nameof(WellKnownDestinations.Clipboard), config.HotkeyProfile2OutputDestinations);
+            Assert.Contains(nameof(WellKnownDestinations.FileNoDialog), config.HotkeyProfile2OutputDestinations);
+            Assert.Equal(originalRegion, config.RegionHotkey);
         }
 
         [Theory]

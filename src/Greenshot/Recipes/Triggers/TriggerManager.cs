@@ -74,24 +74,66 @@ namespace Greenshot.Recipes.Triggers
         {
             if (CoreConfig == null) return;
 
-            // Register hotkeys from legacy config as default hotkey triggers
+            // Profile 1 stays bound to the legacy configuration keys for upgrade compatibility.
             RegisterDefaultHotkeyTrigger("trigger_hotkey_region", "Region Hotkey", CoreConfig.RegionHotkey, RecipeManager.RecipeIdRegion);
             string windowRecipe = CoreConfig.CaptureWindowsInteractive ? RecipeManager.RecipeIdWindow : RecipeManager.RecipeIdActiveWindow;
             RegisterDefaultHotkeyTrigger("trigger_hotkey_window", "Window Hotkey", CoreConfig.WindowHotkey, windowRecipe);
             RegisterDefaultHotkeyTrigger("trigger_hotkey_fullscreen", "Fullscreen Hotkey", CoreConfig.FullscreenHotkey, RecipeManager.RecipeIdFullScreen);
             RegisterDefaultHotkeyTrigger("trigger_hotkey_lastregion", "Last Region Hotkey", CoreConfig.LastregionHotkey, RecipeManager.RecipeIdLastRegion);
             RegisterDefaultHotkeyTrigger("trigger_hotkey_clipboard", "Clipboard Hotkey", CoreConfig.ClipboardHotkey, RecipeManager.RecipeIdClipboard);
+
+            if (CoreConfig.HotkeyProfile2Enabled)
+            {
+                var profile2Destinations = (CoreConfig.HotkeyProfile2OutputDestinations ?? new List<string>())
+                    .Where(designation => !string.IsNullOrWhiteSpace(designation))
+                    .Where(designation => ConfigurationRestrictions.IsDestinationAllowed(CoreConfig, designation))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                // A manually edited configuration may leave only blocked/unknown values. Preserve a useful
+                // fallback without mutating the global Profile 1 destination setting.
+                if (profile2Destinations.Count == 0 && ConfigurationRestrictions.IsDestinationAllowed(CoreConfig, "Editor"))
+                {
+                    profile2Destinations.Add("Editor");
+                }
+
+                var profile2Parameters = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase)
+                {
+                    ["OverrideDestinations"] = profile2Destinations,
+                    ["OverrideDestinationsFromSettings"] = true,
+                    ["HotkeyDestinationProfile"] = 2
+                };
+
+                RegisterDefaultHotkeyTrigger("trigger_hotkey_profile2_region", "Region Hotkey (Profile 2)", CoreConfig.HotkeyProfile2RegionHotkey, RecipeManager.RecipeIdRegion, profile2Parameters);
+                RegisterDefaultHotkeyTrigger("trigger_hotkey_profile2_window", "Window Hotkey (Profile 2)", CoreConfig.HotkeyProfile2WindowHotkey, windowRecipe, profile2Parameters);
+                RegisterDefaultHotkeyTrigger("trigger_hotkey_profile2_fullscreen", "Fullscreen Hotkey (Profile 2)", CoreConfig.HotkeyProfile2FullscreenHotkey, RecipeManager.RecipeIdFullScreen, profile2Parameters);
+                RegisterDefaultHotkeyTrigger("trigger_hotkey_profile2_lastregion", "Last Region Hotkey (Profile 2)", CoreConfig.HotkeyProfile2LastregionHotkey, RecipeManager.RecipeIdLastRegion, profile2Parameters);
+                RegisterDefaultHotkeyTrigger("trigger_hotkey_profile2_clipboard", "Clipboard Hotkey (Profile 2)", CoreConfig.HotkeyProfile2ClipboardHotkey, RecipeManager.RecipeIdClipboard, profile2Parameters);
+            }
+            else
+            {
+                UnregisterProfile2HotkeyTriggers();
+            }
         }
 
-        private void RegisterDefaultHotkeyTrigger(string id, string name, string hotkey, string recipeId)
+        private void RegisterDefaultHotkeyTrigger(string id, string name, string hotkey, string recipeId, IDictionary<string, object> parameters = null)
         {
-            if (string.IsNullOrEmpty(hotkey))
+            if (string.IsNullOrWhiteSpace(hotkey) || string.Equals(hotkey.Trim(), "None", StringComparison.OrdinalIgnoreCase))
             {
                 // The hotkey could have been removed in the settings
                 UnregisterTrigger(id);
                 return;
             }
-            RegisterTrigger(new HotkeyTrigger(id, name, hotkey, recipeId));
+            RegisterTrigger(new HotkeyTrigger(id, name, hotkey, recipeId, parameters));
+        }
+
+        private void UnregisterProfile2HotkeyTriggers()
+        {
+            UnregisterTrigger("trigger_hotkey_profile2_region");
+            UnregisterTrigger("trigger_hotkey_profile2_window");
+            UnregisterTrigger("trigger_hotkey_profile2_fullscreen");
+            UnregisterTrigger("trigger_hotkey_profile2_lastregion");
+            UnregisterTrigger("trigger_hotkey_profile2_clipboard");
         }
 
         /// <summary>
@@ -121,6 +163,101 @@ namespace Greenshot.Recipes.Triggers
                 return _triggers.Values.ToList();
             }
         }
+
+        /// <summary>
+        /// Validate the two built-in hotkey profiles against each other and recipe hotkeys.
+        /// This is called before settings unregister the currently working bindings.
+        /// </summary>
+        public static bool ValidateConfiguredHotkeys(ICoreConfiguration config, IEnumerable<HotkeyTrigger> registeredHotkeys, out string error)
+        {
+            error = null;
+            if (config == null)
+            {
+                return true;
+            }
+
+            var configured = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("Profile 1 - Region", config.RegionHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Window", config.WindowHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Fullscreen", config.FullscreenHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Last region", config.LastregionHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Clipboard", config.ClipboardHotkey)
+            };
+
+            if (config.HotkeyProfile2Enabled)
+            {
+                var profile2 = new[]
+                {
+                    new KeyValuePair<string, string>("Profile 2 - Region", config.HotkeyProfile2RegionHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Window", config.HotkeyProfile2WindowHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Fullscreen", config.HotkeyProfile2FullscreenHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Last region", config.HotkeyProfile2LastregionHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Clipboard", config.HotkeyProfile2ClipboardHotkey)
+                };
+
+                if (!profile2.Any(item => !IsDisabledHotkey(item.Value)))
+                {
+                    error = "Hotkeys & Destinations 2 is enabled but has no hotkey configured.";
+                    return false;
+                }
+
+                configured.AddRange(profile2);
+            }
+
+            var parsed = new List<KeyValuePair<string, HotkeySequence>>();
+            foreach (var item in configured)
+            {
+                if (IsDisabledHotkey(item.Value))
+                {
+                    continue;
+                }
+
+                var sequence = HotkeySequence.Parse(item.Value);
+                if (!sequence.Validate(out string validationError))
+                {
+                    error = $"{item.Key}: {validationError}";
+                    return false;
+                }
+
+                var duplicate = parsed.FirstOrDefault(existing => existing.Value.ConflictsWith(sequence));
+                if (!string.IsNullOrEmpty(duplicate.Key))
+                {
+                    error = $"{item.Key} conflicts with {duplicate.Key} ({sequence}).";
+                    return false;
+                }
+
+                parsed.Add(new KeyValuePair<string, HotkeySequence>(item.Key, sequence));
+            }
+
+            foreach (var recipeHotkey in registeredHotkeys ?? Enumerable.Empty<HotkeyTrigger>())
+            {
+                if (recipeHotkey == null
+                    || recipeHotkey.Id.StartsWith("trigger_hotkey_", StringComparison.OrdinalIgnoreCase)
+                    || IsDisabledHotkey(recipeHotkey.HotkeyString))
+                {
+                    continue;
+                }
+
+                var recipeSequence = HotkeySequence.Parse(recipeHotkey.HotkeyString);
+                if (!recipeSequence.Validate(out _))
+                {
+                    continue;
+                }
+
+                var conflict = parsed.FirstOrDefault(existing => existing.Value.ConflictsWith(recipeSequence));
+                if (!string.IsNullOrEmpty(conflict.Key))
+                {
+                    error = $"{conflict.Key} conflicts with recipe hotkey '{recipeHotkey.Name}' ({recipeSequence}).";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsDisabledHotkey(string hotkey) =>
+            string.IsNullOrWhiteSpace(hotkey) || string.Equals(hotkey.Trim(), "None", StringComparison.OrdinalIgnoreCase);
 
         public IReadOnlyList<ContextMenuTrigger> GetContextMenuTriggers()
         {

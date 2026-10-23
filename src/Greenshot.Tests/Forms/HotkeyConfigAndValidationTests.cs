@@ -113,6 +113,33 @@ namespace Greenshot.Tests.Forms
         }
 
         [Fact]
+        public void HotkeySequence_ConflictDetection_RejectsPrefixesButAllowsDivergentSequences()
+        {
+            var single = HotkeySequence.Parse("Ctrl + K");
+            var longer = HotkeySequence.Parse("Ctrl + K, C");
+            var divergent = HotkeySequence.Parse("Ctrl + K, D");
+
+            Assert.True(single.ConflictsWith(longer));
+            Assert.True(longer.ConflictsWith(single));
+            Assert.True(longer.ConflictsWith(HotkeySequence.Parse("Ctrl + K, C")));
+            Assert.False(longer.ConflictsWith(divergent));
+
+            // "Any" overlaps either side, while explicit left/right remain independently bindable.
+            Assert.True(HotkeySequence.Parse("Ctrl + K").ConflictsWith(HotkeySequence.Parse("Ctrl(L) + K")));
+            Assert.True(HotkeySequence.Parse("Ctrl + K").ConflictsWith(HotkeySequence.Parse("Ctrl(R) + K")));
+            Assert.False(HotkeySequence.Parse("Ctrl(L) + K").ConflictsWith(HotkeySequence.Parse("Ctrl(R) + K")));
+
+            // A modifier omitted on the next chord still accepts that modifier while it remains held
+            // from the previous chord, matching HotkeyManager.MatchChord.
+            Assert.True(
+                HotkeySequence.Parse("Ctrl + K, C")
+                    .ConflictsWith(HotkeySequence.Parse("Ctrl + K, Ctrl + C")));
+            Assert.False(
+                HotkeySequence.Parse("Ctrl + K, C")
+                    .ConflictsWith(HotkeySequence.Parse("Ctrl + K, Alt + C")));
+        }
+
+        [Fact]
         public void HotkeyControls_CanBeInstantiatedOnStaThread()
         {
             Exception threadEx = null;

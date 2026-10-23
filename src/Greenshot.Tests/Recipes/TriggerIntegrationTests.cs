@@ -19,7 +19,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Greenshot.Base;
+using Greenshot.Base.Core;
 using Greenshot.Base.Recipes;
 using Greenshot.Base.Recipes.Triggers;
 using Greenshot.Recipes.Triggers;
@@ -27,7 +31,7 @@ using Xunit;
 
 namespace Greenshot.Tests.Recipes
 {
-    [Collection(TestCollections.RecipeManager)]
+    [Collection(TestCollections.GlobalConfiguration)]
     public class TriggerIntegrationTests
     {
         public TriggerIntegrationTests()
@@ -100,6 +104,75 @@ namespace Greenshot.Tests.Recipes
 
             Assert.True(recipeWithDestinationsEditor.HasDestinationStep());
             Assert.True(recipeWithDestinationsEditor.HasEditorDestination());
+        }
+
+        [Fact]
+        public void HotkeyProfiles_ValidationRejectsCrossProfileAndRecipeCollisions()
+        {
+            var config = new CoreConfigurationImpl();
+            config.ResetToDefaults();
+            config.HotkeyProfile2Enabled = true;
+            config.HotkeyProfile2RegionHotkey = config.RegionHotkey;
+
+            Assert.False(TriggerManager.ValidateConfiguredHotkeys(config, Array.Empty<HotkeyTrigger>(), out string profileError));
+            Assert.Contains("conflicts", profileError, StringComparison.OrdinalIgnoreCase);
+
+            config.HotkeyProfile2RegionHotkey = config.RegionHotkey + ", C";
+            Assert.False(TriggerManager.ValidateConfiguredHotkeys(config, Array.Empty<HotkeyTrigger>(), out string prefixError));
+            Assert.Contains("conflicts", prefixError, StringComparison.OrdinalIgnoreCase);
+
+            config.RegionHotkey = "Ctrl + F13";
+            config.HotkeyProfile2RegionHotkey = "Ctrl(L) + F13";
+            Assert.False(TriggerManager.ValidateConfiguredHotkeys(config, Array.Empty<HotkeyTrigger>(), out string sideOverlapError));
+            Assert.Contains("conflicts", sideOverlapError, StringComparison.OrdinalIgnoreCase);
+
+            config.HotkeyProfile2RegionHotkey = "Ctrl + Alt + F13";
+            using var recipeHotkey = new HotkeyTrigger(
+                "trigger_recipe_test_hotkey_0",
+                "Test recipe",
+                "Ctrl + Alt + F13",
+                "test_recipe");
+
+            Assert.False(TriggerManager.ValidateConfiguredHotkeys(config, new[] { recipeHotkey }, out string recipeError));
+            Assert.Contains("recipe hotkey", recipeError, StringComparison.OrdinalIgnoreCase);
+
+            config.HotkeyProfile2RegionHotkey = "Ctrl + Alt + F14";
+            Assert.True(TriggerManager.ValidateConfiguredHotkeys(config, new[] { recipeHotkey }, out string validError), validError);
+        }
+
+        [Fact]
+        public void HotkeyProfile2_DefaultTriggersCarryIndependentDestinationRoute()
+        {
+            var config = IniConfigHelper.EnsureSection<ICoreConfiguration>(() => new CoreConfigurationImpl());
+            bool oldEnabled = config.HotkeyProfile2Enabled;
+            string oldRegion = config.HotkeyProfile2RegionHotkey;
+            var oldDestinations = config.HotkeyProfile2OutputDestinations == null
+                ? null
+                : new List<string>(config.HotkeyProfile2OutputDestinations);
+
+            try
+            {
+                config.HotkeyProfile2Enabled = true;
+                config.HotkeyProfile2RegionHotkey = "Ctrl + Alt + F14";
+                config.HotkeyProfile2OutputDestinations = new List<string> { nameof(WellKnownDestinations.Clipboard) };
+
+                using var manager = new TriggerManager();
+                var trigger = manager.GetAllTriggers()
+                    .OfType<HotkeyTrigger>()
+                    .Single(t => string.Equals(t.Id, "trigger_hotkey_profile2_region", StringComparison.OrdinalIgnoreCase));
+
+                Assert.NotNull(trigger.TriggerParameters);
+                Assert.True((bool)trigger.TriggerParameters["OverrideDestinationsFromSettings"]);
+                Assert.Equal(2, (int)trigger.TriggerParameters["HotkeyDestinationProfile"]);
+                var destinations = Assert.IsAssignableFrom<IEnumerable<string>>(trigger.TriggerParameters["OverrideDestinations"]);
+                Assert.Equal(new[] { nameof(WellKnownDestinations.Clipboard) }, destinations);
+            }
+            finally
+            {
+                config.HotkeyProfile2Enabled = oldEnabled;
+                config.HotkeyProfile2RegionHotkey = oldRegion;
+                config.HotkeyProfile2OutputDestinations = oldDestinations;
+            }
         }
 
         [Fact]

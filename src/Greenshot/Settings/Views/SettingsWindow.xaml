@@ -237,60 +237,6 @@
                             </StackPanel>
                         </GroupBox>
                         
-                        <!-- Hotkeys -->
-                        <GroupBox Header="{wpf:Text Core.Hotkeys}">
-                            <StackPanel>
-                                <Grid Margin="0,5">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                        <RowDefinition Height="Auto"/>
-                                    </Grid.RowDefinitions>
-                                    
-                                    <Label Grid.Row="0" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturefullscreen}" VerticalAlignment="Center"/>
-                                    <views:HotkeyDisplayView Grid.Row="0" Grid.Column="1"
-                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturefullscreen}"
-                                                                  HotkeyString="{Binding CoreConfiguration.FullscreenHotkey, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=FullscreenHotkey}"
-                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
-                                    
-                                    <Label Grid.Row="1" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturewindow}" VerticalAlignment="Center" Margin="0,4,0,0"/>
-                                    <views:HotkeyDisplayView Grid.Row="1" Grid.Column="1" Margin="0,4,0,0"
-                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturewindow}"
-                                                                  HotkeyString="{Binding CoreConfiguration.WindowHotkey, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=WindowHotkey}"
-                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
-                                    
-                                    <Label Grid.Row="2" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturearea}" VerticalAlignment="Center" Margin="0,4,0,0"/>
-                                    <views:HotkeyDisplayView Grid.Row="2" Grid.Column="1" Margin="0,4,0,0"
-                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturearea}"
-                                                                  HotkeyString="{Binding CoreConfiguration.RegionHotkey, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RegionHotkey}"
-                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
-                                    
-                                    <Label Grid.Row="3" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturelastregion}" VerticalAlignment="Center" Margin="0,4,0,0"/>
-                                    <views:HotkeyDisplayView Grid.Row="3" Grid.Column="1" Margin="0,4,0,0"
-                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturelastregion}"
-                                                                  HotkeyString="{Binding CoreConfiguration.LastregionHotkey, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=LastregionHotkey}"
-                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
-                                    
-                                    <Label Grid.Row="4" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCaptureclipboard}" VerticalAlignment="Center" Margin="0,4,0,0"/>
-                                    <views:HotkeyDisplayView Grid.Row="4" Grid.Column="1" Margin="0,4,0,0"
-                                                                  HeaderText="{wpf:Text Core.ContextmenuCaptureclipboard}"
-                                                                  HotkeyString="{Binding CoreConfiguration.ClipboardHotkey, Mode=TwoWay}"
-                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=ClipboardHotkey}"
-                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
-                                </Grid>
-                            </StackPanel>
-                        </GroupBox>
-                        
                         <!-- Network Settings -->
                         <GroupBox Header="{wpf:Text Settings.Network}">
                             <StackPanel>
@@ -573,8 +519,65 @@
                 </ScrollViewer>
             </TabItem>
             
-            <!-- Destinations Tab -->
-            <TabItem Header="{wpf:Text Settings.Destination}">
+            <!-- Hotkeys and destinations: first (legacy) binding profile -->
+            <TabItem x:Name="HotkeysDestinations1TabItem" Header="Hotkeys &amp; Destinations 1">
+                <ScrollViewer Style="{DynamicResource ThemedScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <!-- Hotkeys -->
+                        <GroupBox Header="{wpf:Text Core.Hotkeys}">
+                            <StackPanel>
+                                <Grid Margin="0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+                                    
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturefullscreen}" VerticalAlignment="Center"/>
+                                    <views:HotkeyDisplayView Grid.Row="0" Grid.Column="1"
+                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturefullscreen}"
+                                                                  HotkeyString="{Binding CoreConfiguration.FullscreenHotkey, Mode=TwoWay}"
+                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=FullscreenHotkey}"
+                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
+                                    
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturewindow}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="1" Grid.Column="1" Margin="0,4,0,0"
+                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturewindow}"
+                                                                  HotkeyString="{Binding CoreConfiguration.WindowHotkey, Mode=TwoWay}"
+                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=WindowHotkey}"
+                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
+                                    
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturearea}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="2" Grid.Column="1" Margin="0,4,0,0"
+                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturearea}"
+                                                                  HotkeyString="{Binding CoreConfiguration.RegionHotkey, Mode=TwoWay}"
+                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RegionHotkey}"
+                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
+                                    
+                                    <Label Grid.Row="3" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturelastregion}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="3" Grid.Column="1" Margin="0,4,0,0"
+                                                                  HeaderText="{wpf:Text Core.ContextmenuCapturelastregion}"
+                                                                  HotkeyString="{Binding CoreConfiguration.LastregionHotkey, Mode=TwoWay}"
+                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=LastregionHotkey}"
+                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
+                                    
+                                    <Label Grid.Row="4" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCaptureclipboard}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="4" Grid.Column="1" Margin="0,4,0,0"
+                                                                  HeaderText="{wpf:Text Core.ContextmenuCaptureclipboard}"
+                                                                  HotkeyString="{Binding CoreConfiguration.ClipboardHotkey, Mode=TwoWay}"
+                                                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=ClipboardHotkey}"
+                                                                  EditRequested="HotkeyDisplayControl_EditRequested"/>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+                        
+
                     <GroupBox Header="{wpf:Text Settings.Destination}">
                         <DockPanel LastChildFill="True">
                             <CheckBox Content="{wpf:Text Settings.DestinationPicker}" 
@@ -652,8 +655,143 @@
                             </ListView>
                         </DockPanel>
                     </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
             
+            <!-- Hotkeys and destinations: second independent binding profile -->
+            <TabItem x:Name="HotkeysDestinations2TabItem" Header="Hotkeys &amp; Destinations 2">
+                <ScrollViewer Style="{DynamicResource ThemedScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel>
+                        <CheckBox Content="Enable Hotkeys &amp; Destinations 2"
+                                  IsChecked="{Binding CoreConfiguration.HotkeyProfile2Enabled, Mode=TwoWay}"
+                                  IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2Enabled}"
+                                  Margin="8,8,8,2"/>
+                        <TextBlock Text="Profile 2 hotkeys use only the destinations configured on this tab. At least one hotkey is required when enabled."
+                                   Margin="12,0,12,8"
+                                   TextWrapping="Wrap"
+                                   Foreground="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=MutedBrush}"/>
+
+                        <StackPanel IsEnabled="{Binding CoreConfiguration.HotkeyProfile2Enabled}">
+                            <GroupBox Header="{wpf:Text Core.Hotkeys}">
+                                <Grid Margin="0,5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
+                                    </Grid.RowDefinitions>
+
+                                    <Label Grid.Row="0" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturefullscreen}" VerticalAlignment="Center"/>
+                                    <views:HotkeyDisplayView Grid.Row="0" Grid.Column="1"
+                                                          HeaderText="{wpf:Text Core.ContextmenuCapturefullscreen}"
+                                                          HotkeyString="{Binding CoreConfiguration.HotkeyProfile2FullscreenHotkey, Mode=TwoWay}"
+                                                          IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2FullscreenHotkey}"
+                                                          EditRequested="HotkeyDisplayControl_EditRequested"/>
+
+                                    <Label Grid.Row="1" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturewindow}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="1" Grid.Column="1" Margin="0,4,0,0"
+                                                          HeaderText="{wpf:Text Core.ContextmenuCapturewindow}"
+                                                          HotkeyString="{Binding CoreConfiguration.HotkeyProfile2WindowHotkey, Mode=TwoWay}"
+                                                          IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2WindowHotkey}"
+                                                          EditRequested="HotkeyDisplayControl_EditRequested"/>
+
+                                    <Label Grid.Row="2" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturearea}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="2" Grid.Column="1" Margin="0,4,0,0"
+                                                          HeaderText="{wpf:Text Core.ContextmenuCapturearea}"
+                                                          HotkeyString="{Binding CoreConfiguration.HotkeyProfile2RegionHotkey, Mode=TwoWay}"
+                                                          IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2RegionHotkey}"
+                                                          EditRequested="HotkeyDisplayControl_EditRequested"/>
+
+                                    <Label Grid.Row="3" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCapturelastregion}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="3" Grid.Column="1" Margin="0,4,0,0"
+                                                          HeaderText="{wpf:Text Core.ContextmenuCapturelastregion}"
+                                                          HotkeyString="{Binding CoreConfiguration.HotkeyProfile2LastregionHotkey, Mode=TwoWay}"
+                                                          IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2LastregionHotkey}"
+                                                          EditRequested="HotkeyDisplayControl_EditRequested"/>
+
+                                    <Label Grid.Row="4" Grid.Column="0" Content="{wpf:Text Core.ContextmenuCaptureclipboard}" VerticalAlignment="Center" Margin="0,4,0,0"/>
+                                    <views:HotkeyDisplayView Grid.Row="4" Grid.Column="1" Margin="0,4,0,0"
+                                                          HeaderText="{wpf:Text Core.ContextmenuCaptureclipboard}"
+                                                          HotkeyString="{Binding CoreConfiguration.HotkeyProfile2ClipboardHotkey, Mode=TwoWay}"
+                                                          IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2ClipboardHotkey}"
+                                                          EditRequested="HotkeyDisplayControl_EditRequested"/>
+                                </Grid>
+                            </GroupBox>
+
+                            <GroupBox Header="{wpf:Text Settings.Destination}">
+                                <DockPanel LastChildFill="True">
+                                    <CheckBox Content="{wpf:Text Settings.DestinationPicker}"
+                                              IsChecked="{Binding PickerSelected2, Mode=TwoWay}"
+                                              IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2OutputDestinations}"
+                                              Margin="5" DockPanel.Dock="Top"/>
+                                    <TextBlock DockPanel.Dock="Bottom"
+                                               Text="Destination availability is shared with Profile 1 and administrator restrictions."
+                                               Margin="8,4"
+                                               TextWrapping="Wrap"
+                                               Foreground="{Binding Source={x:Static wpf:ThemeManager.Instance}, Path=MutedBrush}"/>
+                                    <ListView ItemsSource="{Binding Destinations2}"
+                                              AutomationProperties.Name="Profile 2 destinations"
+                                              KeyboardNavigation.TabNavigation="Continue"
+                                              Style="{DynamicResource ThemeListView}"
+                                              Margin="5"
+                                              ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                              ScrollViewer.CanContentScroll="False"
+                                              IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HotkeyProfile2OutputDestinations}">
+                                        <ListView.ItemContainerStyle>
+                                            <Style TargetType="ListViewItem" BasedOn="{StaticResource ThemeListViewItem}">
+                                                <Setter Property="Focusable" Value="False"/>
+                                            </Style>
+                                        </ListView.ItemContainerStyle>
+                                        <ListView.View>
+                                            <GridView ColumnHeaderContainerStyle="{DynamicResource ThemeGridViewColumnHeader}">
+                                                <GridViewColumn Width="50">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                                                      AutomationProperties.Name="{Binding Description, TargetNullValue=''}">
+                                                                <CheckBox.Style>
+                                                                    <Style TargetType="CheckBox" BasedOn="{StaticResource GreenshotCheckBoxStyle}">
+                                                                        <Setter Property="IsEnabled" Value="{Binding DataContext.PickerSelected2, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource InverseBooleanConverter}}"/>
+                                                                        <Style.Triggers>
+                                                                            <DataTrigger Binding="{Binding IsAllowed}" Value="False">
+                                                                                <Setter Property="IsEnabled" Value="False"/>
+                                                                            </DataTrigger>
+                                                                            <DataTrigger Binding="{Binding Destination}" Value="{x:Null}">
+                                                                                <Setter Property="IsEnabled" Value="False"/>
+                                                                            </DataTrigger>
+                                                                        </Style.Triggers>
+                                                                    </Style>
+                                                                </CheckBox.Style>
+                                                            </CheckBox>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                                <GridViewColumn Header="{wpf:Text Settings.Destination}" Width="420">
+                                                    <GridViewColumn.CellTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                                <Image Source="{Binding IconSource}" Width="16" Height="16" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                                                <TextBlock Text="{Binding Description}" VerticalAlignment="Center"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </GridViewColumn.CellTemplate>
+                                                </GridViewColumn>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
+                                </DockPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <!-- Editor Tab -->
             <TabItem Header="{wpf:Text Settings.Editor}">
                 <ScrollViewer Style="{DynamicResource ThemedScrollViewer}" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">

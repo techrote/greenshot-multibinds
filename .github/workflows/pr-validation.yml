@@ -1,0 +1,45 @@
+name: PR validation
+
+on:
+  pull_request:
+
+concurrency:
+  group: pr-validation-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Windows build and tests
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      Box13_ClientId: ci-placeholder
+      Box13_ClientSecret: ci-placeholder
+      DropBox13_ClientId: ci-placeholder
+      DropBox13_ClientSecret: ci-placeholder
+      Imgur13_ClientId: ci-placeholder
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore and generate build-time sources
+        shell: cmd
+        run: msbuild src\Greenshot.sln /restore /t:PrepareForBuild /p:Configuration=Debug /v:minimal
+
+      - name: Build test dependency graph
+        shell: cmd
+        run: msbuild src\Greenshot.Tests\Greenshot.Tests.csproj /t:Build /p:Configuration=Debug /v:minimal
+
+      - name: Run tests
+        shell: cmd
+        run: dotnet test src\Greenshot.Tests\Greenshot.Tests.csproj -c Debug --no-build --logger "console;verbosity=normal"

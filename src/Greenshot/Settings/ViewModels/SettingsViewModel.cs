@@ -55,6 +55,7 @@ namespace Greenshot.Settings.ViewModels
         private bool _expertModeEnabled;
         private bool _autoStartEnabled;
         private bool _pickerSelected;
+        private bool _pickerSelected2;
         private string _selectedLanguage;
         private int _iconSize;
 
@@ -361,6 +362,8 @@ namespace Greenshot.Settings.ViewModels
 
         public ObservableCollection<DestinationViewModel> Destinations { get; private set; }
 
+        public ObservableCollection<DestinationViewModel> Destinations2 { get; private set; }
+
         public bool PickerSelected
         {
             get => _pickerSelected;
@@ -374,6 +377,26 @@ namespace Greenshot.Settings.ViewModels
                     if (value)
                     {
                         foreach (var dest in Destinations)
+                        {
+                            dest.IsSelected = false;
+                        }
+                    }
+                }
+            }
+        }
+
+        public bool PickerSelected2
+        {
+            get => _pickerSelected2;
+            set
+            {
+                if (_pickerSelected2 != value)
+                {
+                    _pickerSelected2 = value;
+                    OnPropertyChanged();
+                    if (value && Destinations2 != null)
+                    {
+                        foreach (var dest in Destinations2)
                         {
                             dest.IsSelected = false;
                         }
@@ -462,16 +485,58 @@ namespace Greenshot.Settings.ViewModels
                 AddUnregisteredDestination(designation);
             }
 
+            InitializeSecondDestinationProfile();
+
             // Resolve the destination icons asynchronously, the window opens right away
-            LoadDestinationIconsAsync().FireAndLog("Load the destination icons");
+            LoadDestinationIconsAsync(Destinations).FireAndLog("Load the destination icons for profile 1");
+            LoadDestinationIconsAsync(Destinations2).FireAndLog("Load the destination icons for profile 2");
+        }
+
+        private void InitializeSecondDestinationProfile()
+        {
+            var selected = new HashSet<string>(
+                CoreConfiguration.HotkeyProfile2OutputDestinations ?? Enumerable.Empty<string>(),
+                StringComparer.OrdinalIgnoreCase);
+
+            _pickerSelected2 = selected.Contains(nameof(WellKnownDestinations.Picker));
+            Destinations2 = new ObservableCollection<DestinationViewModel>();
+
+            foreach (var source in Destinations)
+            {
+                Destinations2.Add(new DestinationViewModel
+                {
+                    Destination = source.Destination,
+                    Designation = source.Designation,
+                    Description = source.Description,
+                    IconSource = source.IconSource,
+                    IsAllowed = source.IsAllowed,
+                    CanChangeAllowed = false,
+                    IsSelected = selected.Contains(source.Designation)
+                });
+            }
+
+            // Preserve configured designations for plugins that are currently unavailable.
+            foreach (var designation in selected
+                         .Where(designation => !string.Equals(designation, nameof(WellKnownDestinations.Picker), StringComparison.OrdinalIgnoreCase))
+                         .Where(designation => Destinations2.All(item => !string.Equals(item.Designation, designation, StringComparison.OrdinalIgnoreCase))))
+            {
+                Destinations2.Add(new DestinationViewModel
+                {
+                    Designation = designation,
+                    Description = designation,
+                    IsAllowed = ConfigurationRestrictions.IsDestinationAllowed(CoreConfiguration, designation),
+                    CanChangeAllowed = false,
+                    IsSelected = true
+                });
+            }
         }
 
         /// <summary>
         /// Started on the UI thread, the icons are set there (continuations return to the UI thread)
         /// </summary>
-        private async Task LoadDestinationIconsAsync()
+        private async Task LoadDestinationIconsAsync(IEnumerable<DestinationViewModel> destinations)
         {
-            foreach (var destItem in Destinations.ToList())
+            foreach (var destItem in (destinations ?? Enumerable.Empty<DestinationViewModel>()).ToList())
             {
                 try
                 {
