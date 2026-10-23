@@ -164,6 +164,101 @@ namespace Greenshot.Recipes.Triggers
             }
         }
 
+        /// <summary>
+        /// Validate the two built-in hotkey profiles against each other and recipe hotkeys.
+        /// This is called before settings unregister the currently working bindings.
+        /// </summary>
+        public static bool ValidateConfiguredHotkeys(ICoreConfiguration config, IEnumerable<HotkeyTrigger> registeredHotkeys, out string error)
+        {
+            error = null;
+            if (config == null)
+            {
+                return true;
+            }
+
+            var configured = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("Profile 1 - Region", config.RegionHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Window", config.WindowHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Fullscreen", config.FullscreenHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Last region", config.LastregionHotkey),
+                new KeyValuePair<string, string>("Profile 1 - Clipboard", config.ClipboardHotkey)
+            };
+
+            if (config.HotkeyProfile2Enabled)
+            {
+                var profile2 = new[]
+                {
+                    new KeyValuePair<string, string>("Profile 2 - Region", config.HotkeyProfile2RegionHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Window", config.HotkeyProfile2WindowHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Fullscreen", config.HotkeyProfile2FullscreenHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Last region", config.HotkeyProfile2LastregionHotkey),
+                    new KeyValuePair<string, string>("Profile 2 - Clipboard", config.HotkeyProfile2ClipboardHotkey)
+                };
+
+                if (!profile2.Any(item => !IsDisabledHotkey(item.Value)))
+                {
+                    error = "Hotkeys & Destinations 2 is enabled but has no hotkey configured.";
+                    return false;
+                }
+
+                configured.AddRange(profile2);
+            }
+
+            var parsed = new List<KeyValuePair<string, HotkeySequence>>();
+            foreach (var item in configured)
+            {
+                if (IsDisabledHotkey(item.Value))
+                {
+                    continue;
+                }
+
+                var sequence = HotkeySequence.Parse(item.Value);
+                if (!sequence.Validate(out string validationError))
+                {
+                    error = $"{item.Key}: {validationError}";
+                    return false;
+                }
+
+                var duplicate = parsed.FirstOrDefault(existing => existing.Value.Equals(sequence));
+                if (!string.IsNullOrEmpty(duplicate.Key))
+                {
+                    error = $"{item.Key} conflicts with {duplicate.Key} ({sequence}).";
+                    return false;
+                }
+
+                parsed.Add(new KeyValuePair<string, HotkeySequence>(item.Key, sequence));
+            }
+
+            foreach (var recipeHotkey in registeredHotkeys ?? Enumerable.Empty<HotkeyTrigger>())
+            {
+                if (recipeHotkey == null
+                    || recipeHotkey.Id.StartsWith("trigger_hotkey_", StringComparison.OrdinalIgnoreCase)
+                    || IsDisabledHotkey(recipeHotkey.HotkeyString))
+                {
+                    continue;
+                }
+
+                var recipeSequence = HotkeySequence.Parse(recipeHotkey.HotkeyString);
+                if (!recipeSequence.Validate(out _))
+                {
+                    continue;
+                }
+
+                var conflict = parsed.FirstOrDefault(existing => existing.Value.Equals(recipeSequence));
+                if (!string.IsNullOrEmpty(conflict.Key))
+                {
+                    error = $"{conflict.Key} conflicts with recipe hotkey '{recipeHotkey.Name}' ({recipeSequence}).";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsDisabledHotkey(string hotkey) =>
+            string.IsNullOrWhiteSpace(hotkey) || string.Equals(hotkey.Trim(), "None", StringComparison.OrdinalIgnoreCase);
+
         public IReadOnlyList<ContextMenuTrigger> GetContextMenuTriggers()
         {
             lock (_triggers)
