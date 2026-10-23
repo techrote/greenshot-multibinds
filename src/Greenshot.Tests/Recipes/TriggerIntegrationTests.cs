@@ -121,6 +121,11 @@ namespace Greenshot.Tests.Recipes
             Assert.False(TriggerManager.ValidateConfiguredHotkeys(config, Array.Empty<HotkeyTrigger>(), out string prefixError));
             Assert.Contains("conflicts", prefixError, StringComparison.OrdinalIgnoreCase);
 
+            config.RegionHotkey = "Ctrl + F13";
+            config.HotkeyProfile2RegionHotkey = "Ctrl(L) + F13";
+            Assert.False(TriggerManager.ValidateConfiguredHotkeys(config, Array.Empty<HotkeyTrigger>(), out string sideOverlapError));
+            Assert.Contains("conflicts", sideOverlapError, StringComparison.OrdinalIgnoreCase);
+
             config.HotkeyProfile2RegionHotkey = "Ctrl + Alt + F13";
             using var recipeHotkey = new HotkeyTrigger(
                 "trigger_recipe_test_hotkey_0",
