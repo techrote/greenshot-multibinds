@@ -37,6 +37,7 @@ using Greenshot.Base.Recipes.Pipeline;
 using Greenshot.Editor.Destinations;
 using Greenshot.Editor.FileFormatHandlers;
 using Greenshot.Recipes.Pipeline;
+using Greenshot.Recipes.Steps;
 using Xunit;
 
 namespace Greenshot.Tests.Recipes
@@ -88,6 +89,17 @@ namespace Greenshot.Tests.Recipes
             {
                 Calls++;
                 return base.ExportAsync(request, cancellationToken);
+            }
+        }
+
+        private sealed class RecordingDispatcher : IDestinationDispatcher
+        {
+            public List<string> Designations { get; } = new List<string>();
+
+            public Task DispatchAsync(CaptureFlowContext context, IEnumerable<IDestination> destinations, CancellationToken cancellationToken = default)
+            {
+                Designations.AddRange((destinations ?? Enumerable.Empty<IDestination>()).Select(destination => destination.Designation));
+                return Task.CompletedTask;
             }
         }
 
@@ -153,6 +165,27 @@ namespace Greenshot.Tests.Recipes
         /// </summary>
         private static Task DispatchWithoutUiContext(CaptureFlowContext context, params IDestination[] destinations)
             => Task.Run(() => new DestinationDispatcher().DispatchAsync(context, destinations));
+
+        [Fact]
+        public async Task DestinationExportStep_ProfileSettingsOverride_PreservesMissingDestinationFallback()
+        {
+            var node = new RecipeNodeConfig
+            {
+                Id = "export",
+                Name = "Export",
+                StepType = WellKnownStepTypes.Destinations
+            };
+            var dispatcher = new RecordingDispatcher();
+            var step = new DestinationExportStep(node, dispatcher);
+            using var context = new CaptureFlowContext(new CaptureRecipe("profile2_route", "Profile 2 route"));
+
+            context.Properties["OverrideDestinations"] = new List<string> { "MissingPluginDestination" };
+            context.Properties["OverrideDestinationsFromSettings"] = true;
+
+            await step.ExecuteAsync(context);
+
+            Assert.Equal(new[] { EditorDestination.DESIGNATION }, dispatcher.Designations);
+        }
 
         [Fact]
         public async Task Dispatch_FileDestinationWithGreenshotFormat_WritesLoadableFile()
