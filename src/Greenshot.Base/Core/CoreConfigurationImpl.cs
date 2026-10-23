@@ -302,6 +302,15 @@ namespace Greenshot.Base.Core
                 MarkAsDirty();
             }
 
+            // Profile 2 is independent from the legacy output selection, but it follows the same
+            // safety rule that a configured profile always has somewhere to send its capture.
+            HotkeyProfile2OutputDestinations ??= new List<string>();
+            if (HotkeyProfile2OutputDestinations.Count == 0)
+            {
+                HotkeyProfile2OutputDestinations.Add("Editor");
+                MarkAsDirty();
+            }
+
             // Prevent both settings at once, bug #3435056
             if (OutputDestinations.Contains("Clipboard") && OutputFileCopyPathToClipboard)
             {
