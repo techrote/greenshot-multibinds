@@ -113,10 +113,10 @@ namespace Greenshot.Tests.Core
             Assert.False(config.HotkeyProfile2Enabled);
             Assert.Contains(nameof(WellKnownDestinations.Picker), config.HotkeyProfile2OutputDestinations);
 
-            config.OutputDestinations = new List<string> { nameof(WellKnownDestinations.Editor) };
+            config.OutputDestinations = new List<string> { "Editor" };
             config.HotkeyProfile2OutputDestinations = new List<string> { nameof(WellKnownDestinations.Clipboard) };
 
-            Assert.Equal(new[] { nameof(WellKnownDestinations.Editor) }, config.OutputDestinations);
+            Assert.Equal(new[] { "Editor" }, config.OutputDestinations);
             Assert.Equal(new[] { nameof(WellKnownDestinations.Clipboard) }, config.HotkeyProfile2OutputDestinations);
         }
 
