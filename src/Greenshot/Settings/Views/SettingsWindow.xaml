@@ -1196,6 +1196,48 @@
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
+            <TabItem x:Name="RecordingTabItem" Header="Recording">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel Margin="8">
+                        <TextBlock Text="F6: start/stop | F7: select region | F8: border | F9: optional timer" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                        <TextBlock Text="F7 selects on the live screen. The saved region is reused until changed. Escape cancels selection." TextWrapping="Wrap" Margin="0,0,0,8"/>
+                        <TextBlock Text="{Binding CoreConfiguration.RecordingRegion, StringFormat='Selected region (physical screen pixels): {0}'}" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBlock Text="Target FPS (1-120)" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Target FPS (1-120)" Text="{Binding RecordingSettings.Fps, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingFramesPerSecond}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Universal limit in minutes (maximum 120)" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Universal limit in minutes (maximum 120)" Text="{Binding RecordingSettings.MaximumMinutes, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingMaximumMinutes}" Margin="0,0,0,4"/>
+                        <TextBlock Text="The universal limit is always enforced. It caps both timed and manually stopped recordings. Saving queued PNGs and ZIP finalization can continue afterward." TextWrapping="Wrap" Margin="0,5"/>
+                        <CheckBox Content="Enable optional recording time limit (F9)" IsChecked="{Binding RecordingSettings.TimerEnabled}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingTimeLimitEnabled}" Margin="0,5"/>
+                        <TextBlock Text="Optional duration: [days.]hh:mm:ss[.fff]" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Optional duration: [days.]hh:mm:ss[.fff]" Text="{Binding RecordingSettings.TimeLimit, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingTimeLimit}" Margin="0,0,0,4"/>
+                        <TextBlock Text="F9 applies to the current recording too. Time is measured from recording start; the shorter enabled limit wins. Duration changes apply to the next recording." TextWrapping="Wrap" Margin="0,5"/>
+                        <CheckBox Content="Show selected region border (F8); excluded from captured frames" IsChecked="{Binding RecordingSettings.ShowBorder}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingShowBorder}" Margin="0,5"/>
+                        <TextBlock Text="Save directory (blank = Pictures/Greenshot Recordings)" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Save directory (blank = Pictures/Greenshot Recordings)" Text="{Binding RecordingSettings.OutputDirectory, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingOutputDirectory}" Margin="0,0,0,4"/>
+                        <CheckBox Content="Create a separate folder per recording" IsChecked="{Binding RecordingSettings.CreateFolder}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingCreateFolder}" Margin="0,5"/>
+                        <CheckBox Content="Create a ZIP per recording" IsChecked="{Binding RecordingSettings.CreateZip}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingCreateZip}" Margin="0,5"/>
+                        <TextBlock Text="Both: keep folder and ZIP. ZIP only: keep the archive. Neither: save frames directly in the output directory. Existing files are never overwritten." TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBlock Text="Folder / ZIP name template" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Folder / ZIP name template" Text="{Binding RecordingSettings.ContainerTemplate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingContainerTemplate}" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding RecordingSettings.ContainerPreview}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,2,0,6"/>
+                        <TextBlock Text="Image name template (without .png)" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Image name template (without .png)" Text="{Binding RecordingSettings.FrameTemplate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingFrameTemplate}" Margin="0,0,0,4"/>
+                        <TextBlock Text="{Binding RecordingSettings.FramePreview}" TextWrapping="Wrap" FontStyle="Italic" Margin="0,2,0,6"/>
+                        <TextBlock Text="Tokens: {date:yyyy-MM-dd} {time:HH-mm-ss-fff} {timestamp:HH-mm-ss-fff} {duration:0.000} {elapsed:0.000} {window} {fps} {count} {batch:0000} {frame:00000000} {timecode}" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBlock Text="Container duration/count are finalized totals. Image timestamp/elapsed use actual capture time; timecode is nominal non-drop HH-MM-SS-FF from frame number at target FPS. CSV timestamps remain authoritative. Invalid filename characters become underscores; repeated names get a numeric suffix." TextWrapping="Wrap" Margin="0,5"/>
+                        <Expander Header="Recording shortcuts"><StackPanel>
+                        <TextBlock Text="Start / stop" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Start / stop" Text="{Binding RecordingSettings.ToggleKey, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingStartHotkey}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Select region" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Select region" Text="{Binding RecordingSettings.SelectKey, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingSelectHotkey}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Show / hide border" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Show / hide border" Text="{Binding RecordingSettings.BorderKey, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingBorderHotkey}" Margin="0,0,0,4"/>
+                        <TextBlock Text="Toggle optional timer" TextWrapping="Wrap" Margin="0,5"/>
+                        <TextBox AutomationProperties.Name="Toggle optional timer" Text="{Binding RecordingSettings.TimerKey, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=RecordingTimerHotkey}" Margin="0,0,0,4"/>
+                        </StackPanel></Expander>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
         </TabControl>
         
         <!-- Buttons -->

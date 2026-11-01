@@ -306,7 +306,6 @@ namespace Greenshot.Recipes.Triggers
             lock (_triggers)
             {
                 _started = true;
-                Greenshot.Capturing.RegionRecording.RegisterHotkeys();
                 foreach (var trigger in _triggers.Values)
                 {
                     if (trigger.IsEnabled)
@@ -314,6 +313,7 @@ namespace Greenshot.Recipes.Triggers
                         trigger.Start();
                     }
                 }
+                Greenshot.Capturing.RegionRecording.RegisterHotkeys();
             }
         }
 

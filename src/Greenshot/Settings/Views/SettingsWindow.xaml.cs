@@ -128,6 +128,9 @@ namespace Greenshot.Settings.Views
             string normalized = tabName.Trim().ToLowerInvariant();
             switch (normalized)
             {
+                case "recording":
+                    SettingsTabControl.SelectedItem = RecordingTabItem;
+                    break;
                 case "general":
                     SettingsTabControl.SelectedIndex = 0;
                     break;
@@ -219,6 +222,13 @@ namespace Greenshot.Settings.Views
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
+            string recordingError = _viewModel.RecordingSettings.Validate();
+            if (recordingError != null)
+            {
+                SettingsTabControl.SelectedItem = RecordingTabItem;
+                MessageBox.Show(this, recordingError, "Recording settings", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             HotkeyManager.UnregisterHotkeys();
             SaveSettings();
             TriggerManager.Instance.RestartHotkeyTriggers();
@@ -511,6 +521,8 @@ namespace Greenshot.Settings.Views
                 }
             }
             
+            _viewModel.RecordingSettings.Save(_viewModel.CoreConfiguration);
+
             // Force save of all configuration sections
             IniConfigRegistry.Get()?.Save();
         }

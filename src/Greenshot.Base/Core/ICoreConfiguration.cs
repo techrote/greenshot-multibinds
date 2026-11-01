@@ -48,13 +48,9 @@ namespace Greenshot.Base.Core
         [DefaultValue("PrintScreen")]
         string RegionHotkey { get; set; }
 
-        [Description("Select a live region and start saving lossless PNG frames")]
-        [DefaultValue("Ctrl + Alt + 9")]
+        [Description("Start or stop recording the saved region as lossless PNG frames")]
+        [DefaultValue("F6")]
         string RecordingStartHotkey { get; set; }
-
-        [Description("Stop region recording and finish saving its frames")]
-        [DefaultValue("Ctrl + Alt + 7")]
-        string RecordingStopHotkey { get; set; }
 
         [Description("Target frames per second for region recording (1-120)")]
         [DefaultValue(30)]
@@ -62,6 +58,32 @@ namespace Greenshot.Base.Core
 
         [Description("Recording output directory; empty uses Pictures/Greenshot Recordings")]
         string RecordingOutputDirectory { get; set; }
+
+        [DefaultValue("F7")]
+        string RecordingSelectHotkey { get; set; }
+        [DefaultValue("F8")]
+        string RecordingBorderHotkey { get; set; }
+        [DefaultValue("F9")]
+        string RecordingTimerHotkey { get; set; }
+        NativeRect RecordingRegion { get; set; }
+        string RecordingWindowTitle { get; set; }
+        [DefaultValue(true)]
+        bool RecordingShowBorder { get; set; }
+        [DefaultValue(false)]
+        bool RecordingTimeLimitEnabled { get; set; }
+        [DefaultValue("00:01:00")]
+        string RecordingTimeLimit { get; set; }
+        [DefaultValue(10.0)]
+        double RecordingMaximumMinutes { get; set; }
+        [DefaultValue(true)]
+        bool RecordingCreateFolder { get; set; }
+        [DefaultValue(false)]
+        bool RecordingCreateZip { get; set; }
+        [DefaultValue("{date}_{time}_batch{batch:0000}_{duration:0.000}s_{count}frames")]
+        string RecordingContainerTemplate { get; set; }
+        [DefaultValue("batch{batch:0000}_frame{frame:00000000}_{timecode}")]
+        string RecordingFrameTemplate { get; set; }
+        int RecordingBatchNumber { get; set; }
 
         [Description("Hotkey for starting the window capture")]
         [DefaultValue("Alt + PrintScreen")]

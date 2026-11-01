@@ -58,9 +58,12 @@ namespace Greenshot.Settings.ViewModels
         private string _selectedLanguage;
         private int _iconSize;
 
+        public RecordingSettingsViewModel RecordingSettings { get; }
+
         public SettingsViewModel()
         {
             CoreConfiguration = IniConfigHelper.EnsureSection<ICoreConfiguration>(() => new CoreConfigurationImpl());
+            RecordingSettings = new RecordingSettingsViewModel(CoreConfiguration);
             EditorConfiguration = IniConfigHelper.EnsureSection<IEditorConfiguration>(() => new EditorConfigurationImpl());
             _expertModeEnabled = !CoreConfiguration.HideExpertSettings;
             _autoStartEnabled = StartupHelper.IsAutostartEnabled();

@@ -46,4 +46,5 @@
     <ProjectReference Include="..\Greenshot.Plugin.Pdf\Greenshot.Plugin.Pdf.csproj" />
     <ProjectReference Include="..\Greenshot.Plugin.RecipeEditor\Greenshot.Plugin.RecipeEditor.csproj" />
   </ItemGroup>
+  <ItemGroup><Reference Include="System.IO.Compression" /><Reference Include="System.IO.Compression.FileSystem" /></ItemGroup>
 </Project>

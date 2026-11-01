@@ -163,7 +163,19 @@ namespace Greenshot.Shell
             var recording = Greenshot.Capturing.RegionRecording.IsActive;
             var recordItem = AddItem(menu, recording ? "Stop region recording (save PNG frames)" : "Record region as PNG frames...", null,
                 () => { if (Greenshot.Capturing.RegionRecording.IsActive) Greenshot.Capturing.RegionRecording.Stop(); else Greenshot.Capturing.RegionRecording.Start(); });
-            recordItem.InputGestureText = HotkeyText(recording ? conf.RecordingStopHotkey : conf.RecordingStartHotkey);
+            recordItem.InputGestureText = HotkeyText(conf.RecordingStartHotkey);
+            var selectRecording = AddItem(menu, "Select recording region", null, Greenshot.Capturing.RegionRecording.SelectRegion);
+            selectRecording.InputGestureText = HotkeyText(conf.RecordingSelectHotkey);
+            selectRecording.IsEnabled = !recording;
+            var borderRecording = AddItem(menu, "Show recording region border", null, Greenshot.Capturing.RegionRecording.ToggleBorder);
+            borderRecording.IsCheckable = true;
+            borderRecording.IsChecked = conf.RecordingShowBorder;
+            borderRecording.InputGestureText = HotkeyText(conf.RecordingBorderHotkey);
+            var timerRecording = AddItem(menu, "Use optional recording time limit", null, Greenshot.Capturing.RegionRecording.ToggleTimer);
+            timerRecording.IsCheckable = true;
+            timerRecording.IsChecked = conf.RecordingTimeLimitEnabled;
+            timerRecording.InputGestureText = HotkeyText(conf.RecordingTimerHotkey);
+            AddItem(menu, "Recording preferences...", null, () => _shell.ShowSetting(null, "recording"));
             if (Greenshot.Capturing.RegionRecording.LastFolder != null)
                 AddItem(menu, "Open last recording folder", null, Greenshot.Capturing.RegionRecording.OpenLastFolder);
 

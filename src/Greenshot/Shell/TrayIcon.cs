@@ -121,13 +121,14 @@ namespace Greenshot.Shell
             string applicationTitle = Texts.Core.ApplicationTitle;
             if (Greenshot.Capturing.RegionRecording.IsActive)
             {
-                applicationTitle = "Greenshot - Recording PNG frames (" + Dapplo.Ini.IniConfigRegistry.GetSection<Greenshot.Base.Core.ICoreConfiguration>().RecordingStopHotkey + " to stop)";
+                applicationTitle = "Greenshot - Recording PNG frames (" + Dapplo.Ini.IniConfigRegistry.GetSection<Greenshot.Base.Core.ICoreConfiguration>().RecordingStartHotkey + " to stop)";
             }
             if (applicationTitle.StartsWith("Greenshot", StringComparison.Ordinal))
             {
                 applicationTitle = GreenshotEdition.ProductName + applicationTitle.Substring("Greenshot".Length);
             }
 
+            applicationTitle += " | Timer " + (Dapplo.Ini.IniConfigRegistry.GetSection<Greenshot.Base.Core.ICoreConfiguration>().RecordingTimeLimitEnabled ? "ON" : "OFF");
             _taskbarIcon.ToolTipText = NotifyIconTextHelper.ToNotifyIconText(applicationTitle);
         }
 

@@ -1,29 +1,54 @@
-# Region recording MVP
+# Recording
 
-Press **Ctrl+Alt+9** (top number row), drag the ordinary Greenshot region selector on the live screen, then release to start.
-The underlying application keeps updating while selecting. Escape cancels selection. **Ctrl+Alt+7** stops recording. Start is ignored while a recording is selecting, capturing or finishing its writes.
+Open **Preferences > Recording** to configure capture and output. The new controls use a draft until **OK**; Cancel discards recording preference edits.
 
-Frames are independent, numbered lossless RGB PNGs in a unique subfolder of **Pictures/Greenshot Recordings**. The folder
-opens when all frames have been saved. `frames.csv` gives capture timestamps in milliseconds from recording start;
-`recording.txt` records the region in physical screen pixels, target rate, frame count and completion/error status.
+| Shortcut | Action |
+|---|---|
+| F6 | Start / stop recording the saved region |
+| F7 | Select a region on the live screen; Escape cancels |
+| F8 | Show / hide its click-through border |
+| F9 | Enable / disable the optional timer |
 
-The target is 30 fps, subject to capture, CPU and storage speed. The bounded PNG writer queue stops with an error when it
-cannot keep up; it drains accepted frames rather than silently dropping them. Slow captures are not filled with duplicate
-frames. Inspect timestamps for actual timing. Frames capture the visible desktop region, including overlapping windows.
-The MVP records no cursor, audio, HDR metadata, or offscreen/minimized application content. It requires Windows 10 2004+.
+The region is stored in physical screen pixels and persists across recordings and restarts. Select before starting. F7 is unavailable during capture/finalization. Normal screenshot freezing is unchanged. The border is excluded from screenshots; it is hidden if Windows cannot exclude it.
 
-The tray menu also provides start/stop and **Open last recording folder**. During capture the tray tooltip says recording.
-Normal screenshot freezing and destination choices are unchanged; this workflow always uses live selection and bypasses
-the destination picker. Closing Greenshot stops capture and waits for queued frames to finish saving.
+## Time limits and FPS
 
-Expert settings / `[Core]` in greenshot.ini (edit with Greenshot closed):
+- Target FPS: integer 1-120, default 30. Actual rate depends on region, CPU and storage.
+- Optional timer: disabled by default; default duration `00:01:00`. Enter positive `[days.]hh:mm:ss[.fff]` (for example `00:00:12.500`). F9 changes apply during the current capture, measured from its original start, so enabling an already-expired limit stops on the next capture iteration.
+- Universal limit: always enforced, default 10 minutes. Preferences accept positive minutes up to 120, including fractional minutes. The recorder also clamps manual INI values to 120 minutes; invalid values fall back to 10. The shorter enabled limit wins.
+- Timer lengths, FPS and output settings are snapshotted at recording start. F9 controls the optional timer's enabled state live. Reaching a limit stops acquisition, then saves queued frames and finalizes the output. ZIP finalization can outlast a time limit.
 
-```
-RecordingStartHotkey=Ctrl + Alt + 9
-RecordingStopHotkey=Ctrl + Alt + 7
-RecordingFramesPerSecond=30
-RecordingOutputDirectory=
-```
+## Output
 
-An empty output directory uses Pictures/Greenshot Recordings. FPS accepts 1-120. Configuration is applied when hotkeys are
-restarted or Greenshot is restarted. Conflicting shortcuts are logged; tray actions remain available.
+Default destination: **Pictures/Greenshot Recordings**. Choose:
+
+| Folder | ZIP | Result |
+|---|---|---|
+| On | Off | One folder per recording |
+| Off | On | One ZIP; temporary loose frames are removed after successful archive creation |
+| On | On | Folder and ZIP |
+| Off | Off | Individual files in the output root; per-batch CSV/summary names |
+
+ZIP entries retain the original PNG bytes. PNGs are already compressed, so ZIP uses store mode. Working files are written to a unique `.recording-<id>` subfolder and preserved if capture or finalization fails. ZIPs use `.partial` until complete. Collisions receive suffixes; existing files are never overwritten.
+
+## Composable names
+
+Folder/ZIP and frame name templates have live examples in Preferences. Frame templates omit the `.png` extension.
+
+| Token | Meaning / example |
+|---|---|
+| `{date:yyyy-MM-dd}` | Recording start date |
+| `{time:HH-mm-ss-fff}` | Recording start time |
+| `{timestamp:yyyy-MM-dd_HH-mm-ss-fff}` | Actual capture time for a frame; start time for a container |
+| `{duration:0.000}` | Final capture seconds in folder/ZIP names; elapsed seconds in frame names |
+| `{elapsed:0.000}` | Frame capture seconds from start |
+| `{window}` | Foreground window title when the region was selected |
+| `{fps}` | Target FPS |
+| `{count}` | Final saved count in container names; current frame number in frame names |
+| `{batch:0000}` | Persistent recording batch counter |
+| `{frame:00000000}` | One-based frame number |
+| `{timecode}` | Nominal non-drop SMPTE-style `HH-MM-SS-FF`, based on zero-based frame index at target FPS |
+
+Numeric and date/time tokens accept .NET format strings after `:`. Timecode is nominal and does not imply constant actual spacing. `frames.csv` holds the actual monotonic capture timestamps. Invalid filename characters become underscores; reserved Windows names are prefixed. Unknown/malformed tokens are rejected.
+
+The frame queue is bounded at approximately 128 MiB (at least one frame). If PNG storage cannot keep up, acquisition stops and accepted frames drain rather than being silently dropped. The MVP records RGB screen pixels, without cursor, audio, HDR metadata or minimized/offscreen application content. Visible overlapping windows are recorded. Windows 10 2004+ is required for live selection and border exclusion.
