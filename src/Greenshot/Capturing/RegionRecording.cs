@@ -155,6 +155,7 @@ namespace Greenshot.Capturing
         {
             await Task.Yield(); // Start stores completion before anything can re-enter the UI.
             string working = null;
+            RecordingStatusWindow status = null;
             try
             {
                 var area = Config.RecordingRegion;
@@ -177,8 +178,13 @@ namespace Greenshot.Capturing
                 working = Path.Combine(root, ".recording-" + Guid.NewGuid().ToString("N"));
                 LastFolder = working;
                 System.Media.SystemSounds.Asterisk.Play();
+                var progress = new RecordingProgress();
+                TimeSpan CurrentLimit() => _timerEnabled && optional < hard ? optional : hard;
+                try { status = new RecordingStatusWindow(region, progress, CurrentLimit, Config.RecordingStartHotkey); status.Show(); }
+                catch (Exception ex) { status?.Close(); status = null; Log.Warn("Recording status overlay hidden: " + ex.Message); }
                 int frames = await PngFrameRecorder.RecordAsync(region, working, fps, stop.Token, names: names, frameTemplate: frameTemplate,
-                    hardLimit: hard, optionalLimit: () => _timerEnabled ? (TimeSpan?)optional : null);
+                    hardLimit: hard, optionalLimit: () => _timerEnabled ? (TimeSpan?)optional : null, progress: progress);
+                status?.Finalizing();
                 // Final names can now include the actual duration and saved frame count.
                 // R10 exception: ZIP/file finalization owns a dedicated I/O worker; capture and the UI remain responsive.
 #pragma warning disable RS0030
@@ -195,6 +201,7 @@ namespace Greenshot.Capturing
             }
             finally
             {
+                status?.Close();
                 _stop = null;
                 stop.Dispose();
                 RefreshPreferences();

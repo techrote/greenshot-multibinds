@@ -15,23 +15,24 @@ namespace Greenshot.Capturing
     {
         public static Task<int> RecordAsync(Rectangle region, string folder, int fps, CancellationToken stop,
             Func<Bitmap> capture = null, RecordingNames names = null, string frameTemplate = "frame_{frame:00000000}",
-            TimeSpan? hardLimit = null, Func<TimeSpan?> optionalLimit = null)
+            TimeSpan? hardLimit = null, Func<TimeSpan?> optionalLimit = null, RecordingProgress progress = null)
         {
             if (region.Width <= 0 || region.Height <= 0) throw new ArgumentOutOfRangeException(nameof(region));
             if (fps < 1 || fps > 120) throw new ArgumentOutOfRangeException(nameof(fps));
             Directory.CreateDirectory(folder);
             int capacity = (int)Math.Max(1, Math.Min(120, 128L * 1024 * 1024 / ((long)region.Width * region.Height * 4)));
             return RunAsync(region, folder, fps, capacity, stop, capture ?? (() => Capture(region)), names ?? new RecordingNames { Fps = fps }, frameTemplate,
-                hardLimit.HasValue ? RecordingNames.HardLimit(hardLimit.Value.TotalMinutes) : TimeSpan.FromMinutes(10), optionalLimit);
+                hardLimit.HasValue ? RecordingNames.HardLimit(hardLimit.Value.TotalMinutes) : TimeSpan.FromMinutes(10), optionalLimit, progress);
         }
 
         private static async Task<int> RunAsync(Rectangle region, string folder, int fps, int capacity,
-            CancellationToken stop, Func<Bitmap> capture, RecordingNames names, string frameTemplate, TimeSpan hardLimit, Func<TimeSpan?> optionalLimit)
+            CancellationToken stop, Func<Bitmap> capture, RecordingNames names, string frameTemplate, TimeSpan hardLimit, Func<TimeSpan?> optionalLimit, RecordingProgress progress)
         {
             using var queue = new BlockingCollection<Frame>(capacity);
             using var failed = new CancellationTokenSource();
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(stop, failed.Token);
             var watch = Stopwatch.StartNew();
+            progress?.Begin(watch);
             DateTime started = DateTime.UtcNow;
             double capturedDuration = 0;
             int saved = 0;
@@ -53,6 +54,7 @@ namespace Greenshot.Capturing
                                 ? RecordingOutput.UniquePath(folder, basename + "_" + number.ToString("D8", CultureInfo.InvariantCulture), ".png") : candidate;
                             using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.Read)) frame.Image.Save(stream, ImageFormat.Png);
                             saved++;
+                            progress?.Saved();
                             string name = Path.GetFileName(path);
                             index.WriteLine("\"" + name.Replace("\"", "\"\"") + "\"," + frame.Milliseconds.ToString("F3", CultureInfo.InvariantCulture));
                         }
@@ -88,11 +90,12 @@ namespace Greenshot.Capturing
                             bitmap.Dispose();
                             throw new IOException("PNG storage could not keep up; recording stopped. All queued frames were saved.");
                         }
+                        progress?.Captured(timestamp);
                         // No bursts of duplicate frames to catch up after a slow capture.
                         due = Math.Max(due + 1000.0 / fps, watch.Elapsed.TotalMilliseconds);
                     }
                 }
-                finally { capturedDuration = watch.Elapsed.TotalSeconds; queue.CompleteAdding(); }
+                finally { capturedDuration = watch.Elapsed.TotalSeconds; progress?.CaptureStopped(capturedDuration); queue.CompleteAdding(); }
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             try { await Task.WhenAll(producer, writer).ConfigureAwait(false); }
             catch (Exception ex) { failure = ex; }

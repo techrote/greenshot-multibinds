@@ -52,3 +52,8 @@ Folder/ZIP and frame name templates have live examples in Preferences. Frame tem
 Numeric and date/time tokens accept .NET format strings after `:`. Timecode is nominal and does not imply constant actual spacing. `frames.csv` holds the actual monotonic capture timestamps. Invalid filename characters become underscores; reserved Windows names are prefixed. Unknown/malformed tokens are rejected.
 
 The frame queue is bounded at approximately 128 MiB (at least one frame). If PNG storage cannot keep up, acquisition stops and accepted frames drain rather than being silently dropped. The MVP records RGB screen pixels, without cursor, audio, HDR metadata or minimized/offscreen application content. Visible overlapping windows are recorded. Windows 10 2004+ is required for live selection and border exclusion.
+
+## Recording status overlay
+
+During recording, a compact click-through overlay displays elapsed capture time, time remaining to the currently active limit, actual FPS measured over the last second, and captured/saved frame counts. It updates four times per second and follows F9 timer changes. Capture time freezes while queued frames drain; the header changes to Saving frames, then Finalizing output. The overlay closes when the recording finishes. Windows excludes it from captured frames; if exclusion cannot be enabled, the overlay stays hidden. It is placed at the upper-right of the region's monitor, or the lower-right when the upper position overlaps the selected region.
+
