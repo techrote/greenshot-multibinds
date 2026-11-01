@@ -110,7 +110,10 @@ namespace Greenshot.Base.Wpf
                 menu.Items.Add(item);
             }
 
-            menu.Items.Add(ThemedMenu.CreateSeparator());
+            if (menu.Items.Count > 0)
+            {
+                menu.Items.Add(ThemedMenu.CreateSeparator());
+            }
             var closeItem = ThemedMenu.CreateItem(Texts.Editor.Close, null, () => Complete(null));
             ThemedMenu.AssignIcon(closeItem, DestinationIcons.Resource("Close.Image"));
             menu.Items.Add(closeItem);

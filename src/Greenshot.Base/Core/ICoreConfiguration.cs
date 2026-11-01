@@ -71,6 +71,9 @@ namespace Greenshot.Base.Core
         [DefaultValue("Picker")]
         List<string> OutputDestinations { get; set; }
 
+        [Description("Destinations hidden from the destination picker, e.g. Printer. They remain available for direct exports and recipes.")]
+        List<string> HiddenPickerDestinations { get; set; }
+
         [Description("Specify which formats we copy on the clipboard? Options are: PNG, HTML, HTMLDATAURL and DIB")]
         [DefaultValue("PNG,DIB")]
         List<ClipboardFormat> ClipboardFormats { get; set; }

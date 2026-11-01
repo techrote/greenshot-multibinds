@@ -85,11 +85,25 @@ namespace Greenshot.Settings.ViewModels
             {
                 Designation = designation,
                 Description = designation,
+                IsShownInPicker = !ConfigurationRestrictions.Names(CoreConfiguration.HiddenPickerDestinations).Contains(designation, StringComparer.OrdinalIgnoreCase),
                 IsAllowed = ConfigurationRestrictions.IsDestinationAllowed(CoreConfiguration, designation),
                 CanChangeAllowed = !AreDestinationExclusionsFixed && !ConfigurationRestrictions.IsDestinationBlockedByAdministrator(CoreConfiguration, designation)
             };
             Destinations.Add(item);
             return item;
+        }
+
+        /// <summary>
+        /// Save menu visibility separately from destination availability, keeping entries which aren't currently listed.
+        /// </summary>
+        public void SaveDestinationPickerVisibility()
+        {
+            if (!CoreConfiguration.IsConstant(nameof(ICoreConfiguration.HiddenPickerDestinations)) && Destinations != null)
+            {
+                CoreConfiguration.HiddenPickerDestinations = ConfigurationRestrictions.ReplaceListed(CoreConfiguration.HiddenPickerDestinations,
+                    Destinations.Select(item => item.Designation),
+                    Destinations.Where(item => !item.IsShownInPicker).Select(item => item.Designation));
+            }
         }
 
         /// <summary>

@@ -479,6 +479,7 @@ namespace Greenshot.Settings.Views
             }
             
             _viewModel.CoreConfiguration.OutputDestinations = destinations;
+            _viewModel.SaveDestinationPickerVisibility();
             _viewModel.SaveRestrictions();
 
             _viewModel.SaveRecipeOptions();

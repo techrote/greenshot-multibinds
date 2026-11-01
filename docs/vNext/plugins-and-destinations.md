@@ -12,6 +12,9 @@ the settings, nobody has to type them by hand.
   signature check.
 - **Destinations tab:** the *Available* column switches a destination on or off, a destination which is off isn't offered anywhere
   (tray menu, picker, editor, recipes). The change applies when the settings are saved.
+- **Hide entries from the destination menu:** in the Destinations tab, leave *Ask for destination every time* selected and uncheck
+  *Show in menu* for the entries you don't want, such as *Send to printer*. Save the settings to apply the change. Check the box
+  again to restore an entry. This only changes the picker; direct exports, editor commands and recipes can still use the destination.
 
 When the settings name an output destination which isn't there (e.g. its plugin is switched off), it stays in the settings and a
 capture skips it; when none of them is there, the capture opens in the editor.
@@ -44,6 +47,7 @@ All in the `[Core]` section, comma separated, not case sensitive:
 | `BlockedDestinations` | Administrator | Destinations which aren't available. |
 | `AllowedDestinations` | Administrator | When set, only these destinations are available, every other one is blocked. |
 | `ExcludeDestinations` | User | Destinations the user switched off. Set in greenshot-fixed.ini (also empty), the user can't switch destinations off. |
+| `HiddenPickerDestinations` | User | Destinations hidden only from the picker, e.g. `Printer`. Empty or unset shows all available destinations. Set in greenshot-fixed.ini, the menu visibility choices are locked. |
 
 The older `IncludePlugins` and `ExcludePlugins` named a plugin by its identifier, e.g. `Box Plugin`. In greenshot-fixed.ini they
 still apply as an administrator restriction; in greenshot.ini Greenshot moves them to `AllowedPluginNames` and `ExcludePluginNames`

@@ -413,6 +413,7 @@ namespace Greenshot.Settings.ViewModels
                     Destination = destination,
                     Designation = destination.Designation,
                     Description = description,
+                    IsShownInPicker = !ConfigurationRestrictions.Names(CoreConfiguration.HiddenPickerDestinations).Contains(destination.Designation, StringComparer.OrdinalIgnoreCase),
                     // Before IsSelected: switching it off unselects, an output destination which is off stays in the settings
                     IsAllowed = ConfigurationRestrictions.IsDestinationAllowed(CoreConfiguration, destination.Designation),
                     CanChangeAllowed = !AreDestinationExclusionsFixed && !ConfigurationRestrictions.IsDestinationBlockedByAdministrator(CoreConfiguration, destination.Designation),
@@ -426,8 +427,10 @@ namespace Greenshot.Settings.ViewModels
             foreach (var designation in ConfigurationRestrictions.Names(CoreConfiguration.ExcludeDestinations)
                          .Concat(ConfigurationRestrictions.Names(CoreConfiguration.BlockedDestinations))
                          .Concat(ConfigurationRestrictions.Names(CoreConfiguration.AllowedDestinations))
+                         .Concat(ConfigurationRestrictions.Names(CoreConfiguration.HiddenPickerDestinations))
                          .Distinct(StringComparer.OrdinalIgnoreCase)
                          .Where(designation => designation != nameof(WellKnownDestinations.Picker))
+                         .Where(designation => !Destinations.Any(item => string.Equals(item.Designation, designation, StringComparison.OrdinalIgnoreCase)))
                          .ToList())
             {
                 AddUnregisteredDestination(designation);

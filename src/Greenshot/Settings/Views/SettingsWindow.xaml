@@ -565,6 +565,7 @@
                                       IsChecked="{Binding PickerSelected, Mode=TwoWay}" 
                                       IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputDestinations}"
                                       Margin="5" DockPanel.Dock="Top"/>
+                            <TextBlock Text="{wpf:Text Settings.DestinationShowInPickerHelp}" TextWrapping="Wrap" Margin="5" DockPanel.Dock="Top"/>
                             <!-- Which destinations can be used, greenshot-fixed.ini makes it a restriction -->
                             <DockPanel DockPanel.Dock="Bottom" Margin="5" LastChildFill="False">
                                 <Button DockPanel.Dock="Right" Content="{wpf:Text Settings.BlockDestinations}" Style="{StaticResource SecondaryButtonStyle}" Click="AdministratorSettings_Click"/>
@@ -578,8 +579,7 @@
                                       Style="{DynamicResource ThemeListView}"
                                       Margin="5" 
                                       ScrollViewer.VerticalScrollBarVisibility="Visible"
-                                      ScrollViewer.CanContentScroll="False"
-                                      IsEnabled="{Binding CoreConfiguration, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputDestinations}">
+                                      ScrollViewer.CanContentScroll="False">
                                 <ListView.ItemContainerStyle>
                                     <!-- The rows take no focus: Tab (and the arrow keys) go from check box to check box, Space switches one -->
                                     <Style TargetType="ListViewItem" BasedOn="{StaticResource ThemeListViewItem}">
@@ -598,6 +598,9 @@
                                                             <Style TargetType="CheckBox" BasedOn="{StaticResource GreenshotCheckBoxStyle}">
                                                                 <Setter Property="IsEnabled" Value="{Binding DataContext.PickerSelected, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource InverseBooleanConverter}}"/>
                                                                 <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding DataContext.CoreConfiguration, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=OutputDestinations}" Value="False">
+                                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                                    </DataTrigger>
                                                                     <DataTrigger Binding="{Binding IsAllowed}" Value="False">
                                                                         <Setter Property="IsEnabled" Value="False"/>
                                                                     </DataTrigger>
@@ -628,6 +631,17 @@
                                                               AutomationProperties.Name="{Binding Description, TargetNullValue=''}"
                                                               AutomationProperties.HelpText="{wpf:Text Settings.DestinationAvailable}"
                                                               IsEnabled="{Binding CanChangeAllowed}"/>
+                                                </DataTemplate>
+                                            </GridViewColumn.CellTemplate>
+                                        </GridViewColumn>
+                                        <GridViewColumn Header="{wpf:Text Settings.DestinationShowInPicker}" Width="110">
+                                            <GridViewColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsShownInPicker, Mode=TwoWay}"
+                                                              AutomationProperties.Name="{Binding Description, TargetNullValue=''}"
+                                                              AutomationProperties.HelpText="{wpf:Text Settings.DestinationShowInPickerHelp}"
+                                                              ToolTip="{wpf:Text Settings.DestinationShowInPickerHelp}"
+                                                              IsEnabled="{Binding DataContext.CoreConfiguration, RelativeSource={RelativeSource AncestorType=ListView}, Converter={StaticResource FixedToEnabledConverter}, ConverterParameter=HiddenPickerDestinations}"/>
                                                 </DataTemplate>
                                             </GridViewColumn.CellTemplate>
                                         </GridViewColumn>

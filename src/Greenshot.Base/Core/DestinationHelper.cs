@@ -81,6 +81,18 @@ namespace Greenshot.Base.Core
         }
 
         /// <summary>
+        /// Available destinations offered by the picker. Hiding a destination here doesn't disable direct exports.
+        /// </summary>
+        public static IReadOnlyList<IDestination> GetPickerDestinations(ICoreConfiguration configuration, ICaptureDetails captureDetails)
+        {
+            var hidden = new HashSet<string>(ConfigurationRestrictions.Names(configuration?.HiddenPickerDestinations), StringComparer.OrdinalIgnoreCase);
+            return GetAllDestinations()
+                .Where(destination => !string.Equals(destination.Designation, nameof(WellKnownDestinations.Picker), StringComparison.OrdinalIgnoreCase)
+                    && !hidden.Contains(destination.Designation) && destination.IsAvailableFor(captureDetails))
+                .ToList();
+        }
+
+        /// <summary>
         /// Get a destination by a designation
         /// </summary>
         /// <param name="designation">Designation of the destination</param>

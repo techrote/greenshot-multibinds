@@ -29,6 +29,7 @@ namespace Greenshot.Settings.ViewModels
     {
         private bool _isSelected;
         private bool _isAllowed = true;
+        private bool _isShownInPicker = true;
         private ImageSource _iconSource;
 
         /// <summary>
@@ -91,6 +92,22 @@ namespace Greenshot.Settings.ViewModels
         /// False when the administrator blocked the destination, or doesn't let the user switch destinations off
         /// </summary>
         public bool CanChangeAllowed { get; set; } = true;
+
+        /// <summary>
+        /// Whether the destination is shown when asking for a destination after a capture.
+        /// </summary>
+        public bool IsShownInPicker
+        {
+            get => _isShownInPicker;
+            set
+            {
+                if (_isShownInPicker != value)
+                {
+                    _isShownInPicker = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsShownInPicker)));
+                }
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

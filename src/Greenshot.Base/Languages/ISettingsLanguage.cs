@@ -237,6 +237,16 @@ namespace Greenshot.Base.Languages
         string DestinationAvailable { get; }
 
         /// <summary>
+        /// Show in menu
+        /// </summary>
+        string DestinationShowInPicker { get; }
+
+        /// <summary>
+        /// Uncheck a destination to hide it from the menu shown after a capture. It remains available for direct exports and recipes.
+        /// </summary>
+        string DestinationShowInPickerHelp { get; }
+
+        /// <summary>
         /// Plugins are switched on or off at the next start of Greenshot.
         /// </summary>
         string PluginsRestart { get; }
