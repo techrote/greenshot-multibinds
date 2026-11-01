@@ -1,8 +1,7 @@
 # Region recording MVP
 
 Press **Ctrl+Alt+9** (top number row), drag the ordinary Greenshot region selector on the live screen, then release to start.
-The underlying application keeps updating while selecting. Escape cancels selection. **Ctrl+Alt+7** stops recording (also
-cancels selection). Start is ignored while a recording is selecting, capturing or finishing its writes.
+The underlying application keeps updating while selecting. Escape cancels selection. **Ctrl+Alt+7** stops recording. Start is ignored while a recording is selecting, capturing or finishing its writes.
 
 Frames are independent, numbered lossless RGB PNGs in a unique subfolder of **Pictures/Greenshot Recordings**. The folder
 opens when all frames have been saved. `frames.csv` gives capture timestamps in milliseconds from recording start;
