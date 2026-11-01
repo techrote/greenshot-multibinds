@@ -490,6 +490,7 @@ namespace Greenshot.Shell
                 return;
             }
 
+            await Greenshot.Capturing.RegionRecording.StopAsync();
             Log.Info("Exit: " + EnvironmentInfo.EnvironmentToString(false));
             ShutdownUi();
 

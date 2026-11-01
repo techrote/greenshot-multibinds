@@ -119,6 +119,10 @@ namespace Greenshot.Shell
             }
 
             string applicationTitle = Texts.Core.ApplicationTitle;
+            if (Greenshot.Capturing.RegionRecording.IsActive)
+            {
+                applicationTitle = "Greenshot - Recording PNG frames (" + Dapplo.Ini.IniConfigRegistry.GetSection<Greenshot.Base.Core.ICoreConfiguration>().RecordingStopHotkey + " to stop)";
+            }
             if (applicationTitle.StartsWith("Greenshot", StringComparison.Ordinal))
             {
                 applicationTitle = GreenshotEdition.ProductName + applicationTitle.Substring("Greenshot".Length);

@@ -160,6 +160,13 @@ namespace Greenshot.Shell
             var captureArea = AddItem(menu, Texts.Core.ContextmenuCapturearea, "contextmenu_capturearea.Image", () => CaptureHelper.CaptureRegion(false));
             captureArea.InputGestureText = HotkeyText(conf.RegionHotkey);
 
+            var recording = Greenshot.Capturing.RegionRecording.IsActive;
+            var recordItem = AddItem(menu, recording ? "Stop region recording (save PNG frames)" : "Record region as PNG frames...", null,
+                () => { if (Greenshot.Capturing.RegionRecording.IsActive) Greenshot.Capturing.RegionRecording.Stop(); else Greenshot.Capturing.RegionRecording.Start(); });
+            recordItem.InputGestureText = HotkeyText(recording ? conf.RecordingStopHotkey : conf.RecordingStartHotkey);
+            if (Greenshot.Capturing.RegionRecording.LastFolder != null)
+                AddItem(menu, "Open last recording folder", null, Greenshot.Capturing.RegionRecording.OpenLastFolder);
+
             var lastRegion = AddItem(menu, Texts.Core.ContextmenuCapturelastregion, "contextmenu_capturelastregion.Image", () => CaptureHelper.CaptureLastRegion(false));
             lastRegion.InputGestureText = HotkeyText(conf.LastregionHotkey);
             lastRegion.IsEnabled = conf.LastCapturedRegion != NativeRect.Empty;

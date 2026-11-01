@@ -508,7 +508,8 @@ namespace Greenshot.Capturing.Views
                 }
             }
             _live = capture.Image == null;
-            _liveAllowed = LiveScreenCaptureSource.IsSupported && !capture.CaptureDetails.MetaData.ContainsKey(LiveScreenCaptureSource.FrozenOnlyKey);
+            _liveAllowed = LiveScreenCaptureSource.IsSupported && !capture.CaptureDetails.MetaData.ContainsKey(LiveScreenCaptureSource.FrozenOnlyKey)
+                && !capture.CaptureDetails.MetaData.ContainsKey("recording_live_only");
             // Not shown yet: the application below has the focus, it gets it back when L switches to the live screen
             _previousForeground = User32Api.GetForegroundWindow();
             _tools = CreateTools();

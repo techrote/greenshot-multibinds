@@ -48,6 +48,21 @@ namespace Greenshot.Base.Core
         [DefaultValue("PrintScreen")]
         string RegionHotkey { get; set; }
 
+        [Description("Select a live region and start saving lossless PNG frames")]
+        [DefaultValue("Ctrl + Alt + 9")]
+        string RecordingStartHotkey { get; set; }
+
+        [Description("Stop region recording and finish saving its frames")]
+        [DefaultValue("Ctrl + Alt + 7")]
+        string RecordingStopHotkey { get; set; }
+
+        [Description("Target frames per second for region recording (1-120)")]
+        [DefaultValue(30)]
+        int RecordingFramesPerSecond { get; set; }
+
+        [Description("Recording output directory; empty uses Pictures/Greenshot Recordings")]
+        string RecordingOutputDirectory { get; set; }
+
         [Description("Hotkey for starting the window capture")]
         [DefaultValue("Alt + PrintScreen")]
         string WindowHotkey { get; set; }
