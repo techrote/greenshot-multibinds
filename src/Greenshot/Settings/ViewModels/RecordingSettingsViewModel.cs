@@ -25,6 +25,7 @@ namespace Greenshot.Settings.ViewModels
             TimerEnabled = config.RecordingTimeLimitEnabled;
             CreateFolder = config.RecordingCreateFolder;
             CreateZip = config.RecordingCreateZip;
+            OpenCompletedOutput = config.RecordingOpenCompletedOutput;
             ShowBorder = config.RecordingShowBorder;
         }
         public string Fps { get => _fps; set { _fps = value; Changed(); } }
@@ -40,6 +41,7 @@ namespace Greenshot.Settings.ViewModels
         public bool TimerEnabled { get; set; }
         public bool CreateFolder { get; set; }
         public bool CreateZip { get; set; }
+        public bool OpenCompletedOutput { get; set; }
         public bool ShowBorder { get; set; }
         private RecordingNames Example => new RecordingNames { Started = new DateTime(2026, 11, 1, 14, 5, 6, 123), Batch = 12, Fps = int.TryParse(Fps, out int fps) && fps > 0 ? fps : 30, Window = "Cybersand", Duration = 12.345, Count = 370 };
         public string ContainerPreview { get { try { return Example.Render(ContainerTemplate); } catch (Exception ex) { return ex.Message; } } }
@@ -76,6 +78,7 @@ namespace Greenshot.Settings.ViewModels
             Set(nameof(config.RecordingTimeLimitEnabled), () => config.RecordingTimeLimitEnabled = TimerEnabled);
             Set(nameof(config.RecordingOutputDirectory), () => config.RecordingOutputDirectory = OutputDirectory?.Trim());
             Set(nameof(config.RecordingCreateFolder), () => config.RecordingCreateFolder = CreateFolder);
+            Set(nameof(config.RecordingOpenCompletedOutput), () => config.RecordingOpenCompletedOutput = OpenCompletedOutput);
             Set(nameof(config.RecordingCreateZip), () => config.RecordingCreateZip = CreateZip);
             Set(nameof(config.RecordingShowBorder), () => config.RecordingShowBorder = ShowBorder);
             Set(nameof(config.RecordingContainerTemplate), () => config.RecordingContainerTemplate = ContainerTemplate);

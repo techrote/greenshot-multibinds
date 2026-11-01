@@ -43,11 +43,13 @@ namespace Greenshot.Tests.Capturing
             draft.MaximumMinutes = "120";
             draft.TimeLimit = "4.12:00:00";
             draft.CreateZip = true;
+            draft.OpenCompletedOutput = false;
             Assert.Null(draft.Validate());
             draft.Save(config);
             Assert.Equal(60, config.RecordingFramesPerSecond);
             Assert.Equal(120, config.RecordingMaximumMinutes);
             Assert.True(config.RecordingCreateZip);
+            Assert.False(config.RecordingOpenCompletedOutput);
             Assert.Equal(TimeSpan.FromHours(108), RecordingNames.ParseLimit(config.RecordingTimeLimit));
             draft.FrameTemplate = "{unknown}";
             Assert.NotNull(draft.Validate());

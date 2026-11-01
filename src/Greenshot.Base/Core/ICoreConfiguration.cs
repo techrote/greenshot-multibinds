@@ -79,6 +79,8 @@ namespace Greenshot.Base.Core
         bool RecordingCreateFolder { get; set; }
         [DefaultValue(false)]
         bool RecordingCreateZip { get; set; }
+        [DefaultValue(true)]
+        bool RecordingOpenCompletedOutput { get; set; }
         [DefaultValue("{date}_{time}_batch{batch:0000}_{duration:0.000}s_{count}frames")]
         string RecordingContainerTemplate { get; set; }
         [DefaultValue("batch{batch:0000}_frame{frame:00000000}_{timecode}")]

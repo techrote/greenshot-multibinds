@@ -192,7 +192,7 @@ namespace Greenshot.Capturing
                     CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 #pragma warning restore RS0030
                 Log.Info("Recording finished: " + frames + " frames; " + LastFolder);
-                OpenLastFolder();
+                if (Config.RecordingOpenCompletedOutput) OpenLastFolder();
             }
             catch (Exception ex)
             {
