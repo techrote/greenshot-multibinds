@@ -405,6 +405,23 @@ public static class HotkeyManager
     }
 
     /// <summary>
+    /// True when the sequence is equal to, a prefix of, or has as a prefix an existing registration.
+    /// Such registrations cannot be distinguished reliably by the chord state machine.
+    /// </summary>
+    public static bool ConflictsWithRegistered(HotkeySequence sequence)
+    {
+        if (sequence == null || sequence.IsEmpty)
+        {
+            return false;
+        }
+
+        lock (RegisteredHotkeys)
+        {
+            return RegisteredHotkeys.Exists(x => x.Sequence.ConflictsWith(sequence));
+        }
+    }
+
+    /// <summary>
     /// Unregisters all currently registered global hotkeys and releases associated resources.
     /// </summary>
     public static void UnregisterHotkeys()

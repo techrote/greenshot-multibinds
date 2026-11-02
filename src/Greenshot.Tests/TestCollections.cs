@@ -37,6 +37,9 @@ namespace Greenshot.Tests
 
         /// <summary>Tests that change the real Windows clipboard: they run alone, never in parallel with other tests.</summary>
         public const string Clipboard = "Clipboard";
+
+        /// <summary>Tests that temporarily mutate process-wide configuration or other global recipe state.</summary>
+        public const string GlobalConfiguration = "GlobalConfiguration";
     }
 
     [CollectionDefinition(TestCollections.Clipboard, DisableParallelization = true)]
@@ -46,6 +49,11 @@ namespace Greenshot.Tests
 
     [CollectionDefinition(TestCollections.RecipeManager)]
     public class RecipeManagerCollection
+    {
+    }
+
+    [CollectionDefinition(TestCollections.GlobalConfiguration, DisableParallelization = true)]
+    public class GlobalConfigurationCollection
     {
     }
 

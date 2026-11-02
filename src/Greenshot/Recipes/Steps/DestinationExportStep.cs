@@ -360,6 +360,14 @@ namespace Greenshot.Recipes.Steps
             // Priority 2: Context property override (e.g. from trigger or caller)
             if (context != null && context.Properties.TryGetValue("OverrideDestinations", out var ctxVal) && ctxVal != null)
             {
+                // A hotkey/destination profile is still user settings even though it travels as a
+                // per-flow override. Keep the normal "missing plugin -> editor" fallback in that case.
+                if (context.Properties.TryGetValue("OverrideDestinationsFromSettings", out var fromSettingsValue)
+                    && fromSettingsValue is bool overrideFromSettings && overrideFromSettings)
+                {
+                    fromSettings = true;
+                }
+
                 if (ctxVal is IEnumerable<string> ctxDests) return ctxDests;
                 if (ctxVal is string ctxStr && !string.IsNullOrWhiteSpace(ctxStr)) return new[] { ctxStr };
             }

@@ -19,6 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+using System.Collections.Generic;
 using Dapplo.Windows.Input.Enums;
 using Greenshot.Base.Core;
 using Greenshot.Base.Recipes.Triggers;
@@ -35,12 +36,15 @@ namespace Greenshot.Recipes.Triggers
         private static readonly ILog Log = LogManager.GetLogger(typeof(HotkeyTrigger));
 
         private int _registrationId = -1;
+        private readonly IDictionary<string, object> _triggerParameters;
         public string HotkeyString { get; set; }
+        internal IReadOnlyDictionary<string, object> TriggerParameters => _triggerParameters as IReadOnlyDictionary<string, object>;
 
-        public HotkeyTrigger(string id, string name, string hotkeyString, string targetRecipeId)
+        public HotkeyTrigger(string id, string name, string hotkeyString, string targetRecipeId, IDictionary<string, object> triggerParameters = null)
             : base(id, name, targetRecipeId)
         {
             HotkeyString = hotkeyString;
+            _triggerParameters = triggerParameters == null ? null : new Dictionary<string, object>(triggerParameters);
         }
 
         public override void Start()
@@ -62,13 +66,27 @@ namespace Greenshot.Recipes.Triggers
                 return;
             }
 
+            if (!sequence.Validate(out string validationError))
+            {
+                Log.WarnFormat("Skipping invalid hotkey '{0}' for {1}: {2}", HotkeyString, Name, validationError);
+                return;
+            }
+
+            // Never replace an already-working binding. Historically HotkeyManager replaces duplicate
+            // handlers; triggers must refuse collisions so a later profile or recipe cannot steal a key.
+            if (HotkeyManager.ConflictsWithRegistered(sequence))
+            {
+                Log.WarnFormat("Skipping hotkey '{0}' for {1}: the sequence conflicts with an existing registration.", HotkeyString, Name);
+                return;
+            }
+
             var ui = SimpleServiceProvider.Current.GetInstance<IUiDispatcher>(isOptional: true) ?? InlineUiDispatcher.Instance;
 
             _registrationId = HotkeyManager.RegisterHotKey(sequence, () =>
             {
                 Log.DebugFormat("Hotkey '{0}' pressed for trigger '{1}' -> recipe '{2}'", HotkeyString, Name, TargetRecipeId);
                 // Raise the trigger on the UI thread (posted, the keyboard hook must return quickly)
-                ui.InvokeAsync(() => OnTriggered()).FireAndLog($"Hotkey trigger {Name}", Log);
+                ui.InvokeAsync(() => OnTriggered(_triggerParameters)).FireAndLog($"Hotkey trigger {Name}", Log);
             });
 
             if (_registrationId >= 0)

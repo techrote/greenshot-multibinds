@@ -176,6 +176,85 @@ namespace Greenshot.Base.Core
             return string.Join(", ", Chords.Select(c => c.ToString()));
         }
 
+        /// <summary>
+        /// True when two registered sequences are ambiguous because they are equal or one is a
+        /// complete prefix of the other. Sequences sharing only part of a prefix may coexist.
+        /// </summary>
+        public bool ConflictsWith(HotkeySequence other)
+        {
+            if (other == null || IsEmpty || other.IsEmpty)
+            {
+                return false;
+            }
+
+            int commonLength = Math.Min(Chords.Count, other.Chords.Count);
+            for (int i = 0; i < commonLength; i++)
+            {
+                KeyChord previousThis = i > 0 ? Chords[i - 1] : null;
+                KeyChord previousOther = i > 0 ? other.Chords[i - 1] : null;
+                if (!ChordsOverlap(Chords[i], previousThis, other.Chords[i], previousOther))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool ChordsOverlap(KeyChord first, KeyChord previousFirst, KeyChord second, KeyChord previousSecond)
+        {
+            if (first == null || second == null || first.Key != second.Key)
+            {
+                return false;
+            }
+
+            return ModifierStatesOverlap(first.Ctrl, first.CtrlLocation, previousFirst?.Ctrl == true,
+                                         second.Ctrl, second.CtrlLocation, previousSecond?.Ctrl == true)
+                   && ModifierStatesOverlap(first.Alt, first.AltLocation, previousFirst?.Alt == true,
+                                            second.Alt, second.AltLocation, previousSecond?.Alt == true)
+                   && ModifierStatesOverlap(first.Shift, first.ShiftLocation, previousFirst?.Shift == true,
+                                            second.Shift, second.ShiftLocation, previousSecond?.Shift == true)
+                   && ModifierStatesOverlap(first.Win, first.WinLocation, previousFirst?.Win == true,
+                                            second.Win, second.WinLocation, previousSecond?.Win == true);
+        }
+
+        private static bool ModifierStatesOverlap(
+            bool requiredFirst,
+            ModifierLocation locationFirst,
+            bool previousFirstRequired,
+            bool requiredSecond,
+            ModifierLocation locationSecond,
+            bool previousSecondRequired)
+        {
+            int firstStates = AllowedModifierStates(requiredFirst, locationFirst, previousFirstRequired);
+            int secondStates = AllowedModifierStates(requiredSecond, locationSecond, previousSecondRequired);
+            return (firstStates & secondStates) != 0;
+        }
+
+        private static int AllowedModifierStates(bool required, ModifierLocation location, bool previousRequired)
+        {
+            const int None = 1;
+            const int Left = 2;
+            const int Right = 4;
+
+            if (!required)
+            {
+                // MatchChord permits a modifier to remain held on a later chord when the preceding
+                // chord required it; otherwise an unexpected modifier rejects the chord.
+                return previousRequired ? None | Left | Right : None;
+            }
+
+            switch (location)
+            {
+                case ModifierLocation.Left:
+                    return Left;
+                case ModifierLocation.Right:
+                    return Right;
+                default:
+                    return Left | Right;
+            }
+        }
+
         public bool Equals(HotkeySequence other)
         {
             if (other is null) return false;
